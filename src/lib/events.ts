@@ -1,4 +1,4 @@
-import { getEra, type Era, type EraId } from "./eras";
+import { getEra, ERA_IDS, type Era, type EraId } from "./eras";
 import type { CollectionEntry } from "astro:content";
 
 export interface Filters {
@@ -86,5 +86,5 @@ export function groupByEra<T extends Filterable & { order: number }>(
     }
     group.items.push(item);
   }
-  return result;
+  return result.sort((a, b) => ERA_IDS.indexOf(a.era.id) - ERA_IDS.indexOf(b.era.id));
 }

@@ -43,6 +43,15 @@ describe("groupByEra", () => {
     expect(groups.map((g) => g.era.id)).toEqual(["mecca", "medina"]);
     expect(groups[0].items.map((e) => e.order)).toEqual([1, 2]);
   });
+
+  it("orders groups by ERA_IDS regardless of event order", () => {
+    const medinaFirst = { era: "medina" as const, themes: ["perang"], searchText: "perang badar", order: 1 };
+    const meccaLater = { era: "mecca" as const, themes: ["wahyu"], searchText: "wahyu pertama gua hira", order: 2 };
+    const groups = groupByEra([medinaFirst, meccaLater]);
+    expect(groups.map((g) => g.era.id)).toEqual(["mecca", "medina"]);
+    expect(groups[0].items.map((e) => e.order)).toEqual([2]);
+    expect(groups[1].items.map((e) => e.order)).toEqual([1]);
+  });
 });
 
 describe("filterEvents", () => {
