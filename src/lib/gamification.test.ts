@@ -47,6 +47,12 @@ describe("computeBadges", () => {
     expect(ids).toContain("era-jahiliyyah");
     expect(ids).not.toContain("all-read");
   });
+  it("does not earn an era badge until the whole era is read", () => {
+    const partial = { ...initialState(), readIds: ["a"] };
+    expect(computeBadges(partial, events).map((b) => b.id)).not.toContain("era-jahiliyyah");
+    const complete = { ...initialState(), readIds: ["a", "b"] };
+    expect(computeBadges(complete, events).map((b) => b.id)).toContain("era-jahiliyyah");
+  });
   it("earns all-read when every event is read", () => {
     const s = { ...initialState(), readIds: events.map((e) => e.id) };
     expect(computeBadges(s, events).map((b) => b.id)).toContain("all-read");

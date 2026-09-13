@@ -109,10 +109,13 @@ export function computeBadges(state: PlayerState, events: EventMeta[]): Badge[] 
     earned.push(BADGES.find((b) => b.id === "first-read")!);
   }
 
-  const eraIds = new Set(events.filter((e) => read.has(e.id)).map((e) => e.era));
-  for (const era of eraIds) {
-    const badge = BADGES.find((b) => b.id === `era-${era}`);
-    if (badge) earned.push(badge);
+  const eras = ["jahiliyyah", "mecca", "medina", "post-fath"];
+  for (const era of eras) {
+    const eraIds = events.filter((e) => e.era === era).map((e) => e.id);
+    if (eraIds.length > 0 && eraIds.every((id) => read.has(id))) {
+      const badge = BADGES.find((b) => b.id === `era-${era}`);
+      if (badge) earned.push(badge);
+    }
   }
 
   if (state.streak >= 3) {
