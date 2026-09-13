@@ -2225,3 +2225,835 @@ Era: `jahiliyyah`, `mecca`, `medina`, `post-fath`.
 git add README.md
 git commit -m "docs: add README"
 ```
+
+---
+
+# Phase 2 — Content Enrichment (added 2026-09-13)
+
+The spec now requires full-depth content (dialogues, Quranic verses, hadith,
+with citations) plus a `lessons` ("what we can learn from it") list per event.
+Tasks 12–16 implement this. They supersede the old Task 11 (final validation +
+README), which is now Task 16.
+
+## Content Enrichment Standard (applies to Tasks 13–15)
+
+Each event MDX file is REWRITTEN to include:
+
+1. **Detailed narrative** in Indonesian (3–6 substantial paragraphs, not a
+   summary) that tells the story fully, including **dialogues/conversations**
+   written as quoted speech (e.g. “Iqra'!” — “Aku tidak bisa membaca.”).
+2. **Quranic verses** where relevant, using the `<Verse>` component, always
+   with `surah`/`ayah` (and `ayahEnd` for ranges) so the audio plays:
+   `<Verse arabic="…" translation="…" source="QS. Asy-Syu'ara: 214" surah={26} ayah={214} />`.
+3. **Hadith** where relevant, using the `<Hadith>` component:
+   `<Hadith arabic="…" translation="…" source="HR. Al-Bukhari no. 3" link="https://sunnah.com/bukhari:3" />`.
+4. **`lessons`** in frontmatter: 3–5 strings, each a self-contained
+   "what we can learn from it" statement, grounded in the cited sources
+   (no free-form opinion).
+5. **`sources`** retained/expanded (1–3 entries), with precise references.
+
+**Accuracy rules (mandatory):**
+- Verses must be authentic with correct `QS. <surah>:<ayat>` references.
+- Hadith must be authentic (Sahih al-Bukhari / Sahih Muslim preferred) with
+  correct perawi + number and a `sunnah.com` link where possible.
+- Do NOT invent or approximate citations. If unsure of an exact hadith
+  number, cite the kitab/chapter instead (e.g. "HR. Al-Bukhari, Kitab
+  Bad' al-Wahyi").
+- Source base: Ar-Raheeq Al-Makhtum (Syaikh Shafiyyurrahman Al-Mubarakfuri),
+  Sirah Nabawiyah Ibnu Hisyam, Sahih al-Bukhari/Muslim via sunnah.com.
+- Tone: Indonesian, respectful; write "ﷺ" after the Prophet's name;
+  capitalize "Beliau".
+
+**MDX layout per file:**
+```mdx
+---
+order: 7
+year: "610 M (Ramadan)"
+era: "mecca"
+title: "Wahyu Pertama di Gua Hira"
+titleAr: "أول الوحي في غار حراء"
+summary: "…"
+location: "Gua Hira, Makkah"
+themes: ["wahyu", "dakwah"]
+sources:
+  - title: "Sahih al-Bukhari"
+    author: "Imam Al-Bukhari"
+    reference: "Hadis no. 3 (Bab Permulaan Wahyu)"
+    link: "https://sunnah.com/bukhari:3"
+  - title: "Ar-Raheeq Al-Makhtum (Sirah Nabawiyah)"
+    author: "Syaikh Shafiyyurrahman Al-Mubarakfuri"
+    reference: "Bab 'Di Gua Hira'"
+lessons:
+  - "…"
+  - "…"
+  - "…"
+related: ["…"]
+---
+import Verse from "../../components/Verse.astro";
+import Hadith from "../../components/Hadith.astro";
+
+<narrative paragraphs…>
+
+<Verse arabic="…" translation="…" source="QS. …" surah={…} ayah={…} />
+
+<Hadith arabic="…" translation="…" source="HR. …" link="…" />
+```
+
+## Task 12: Lessons field, Verse/Hadith components, detail-page lessons
+
+**Files:**
+- Modify: `src/content/config.ts` (add `lessons`)
+- Create: `src/lib/audio.ts`
+- Test: `src/lib/audio.test.ts`
+- Create: `src/components/Verse.astro`
+- Create: `src/components/Hadith.astro`
+- Modify: `src/layouts/Base.astro` (global audio player script)
+- Modify: `src/pages/events/[slug].astro` (render lessons section)
+
+**Interfaces:**
+- Produces: `Verse` and `Hadith` MDX components; `lessons` schema field;
+  `ayahsAudioUrls(surah, ayah, ayahEnd?, reciter?)` in `src/lib/audio.ts`.
+  Consumed by content tasks 13–15 and the detail page.
+
+**Audio source:** Quranic verse audio is served from the public, free
+`everyayah.com` per-ayah MP3 files. URL pattern:
+`https://everyayah.com/data/{reciter}/{surah:03d}{ayah:03d}.mp3` (e.g.
+`https://everyayah.com/data/Alafasy_128kbps/001001.mp3`). Default reciter
+`Alafasy_128kbps` (Mishary Rashid Alafasy).
+
+- [ ] **Step 1: Add `lessons` to the schema (temporarily optional)**
+
+In `src/content/config.ts`, add after the `related` line:
+```ts
+      lessons: z.array(z.string()).optional(),
+```
+(Optional here so the existing 34 files still validate; Task 16 flips it to
+`.min(1)` to enforce completeness once all content is enriched.)
+
+- [ ] **Step 2: Write `src/lib/audio.ts` + test (TDD)**
+
+Test first (`src/lib/audio.test.ts`):
+```ts
+import { describe, it, expect } from "vitest";
+import { ayahsAudioUrls } from "./audio";
+
+describe("ayahsAudioUrls", () => {
+  it("builds a single-ayah URL with zero padding", () => {
+    expect(ayahsAudioUrls(1, 1)).toEqual(["https://everyayah.com/data/Alafasy_128kbps/001001.mp3"]);
+  });
+  it("builds a range of ayah URLs", () => {
+    expect(ayahsAudioUrls(96, 1, 5)).toEqual([
+      "https://everyayah.com/data/Alafasy_128kbps/096001.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096002.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096003.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096004.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096005.mp3",
+    ]);
+  });
+  it("honors a custom reciter", () => {
+    expect(ayahsAudioUrls(1, 1, 1, "Husary_128kbps")[0]).toContain("Husary_128kbps");
+  });
+});
+```
+
+Implementation (`src/lib/audio.ts`):
+```ts
+export const DEFAULT_RECITER = "Alafasy_128kbps";
+
+const pad = (n: number) => String(n).padStart(3, "0");
+
+export function ayahsAudioUrls(
+  surah: number,
+  ayah: number,
+  ayahEnd?: number,
+  reciter: string = DEFAULT_RECITER,
+): string[] {
+  const end = ayahEnd ?? ayah;
+  const urls: string[] = [];
+  for (let a = ayah; a <= end; a++) {
+    urls.push(`https://everyayah.com/data/${reciter}/${pad(surah)}${pad(a)}.mp3`);
+  }
+  return urls;
+}
+```
+
+Run `npx vitest run src/lib/audio.test.ts` (expect fail then pass).
+
+- [ ] **Step 3: Write `src/components/Verse.astro` (with audio)**
+
+```astro
+---
+import { ayahsAudioUrls } from "../lib/audio";
+
+interface Props {
+  arabic: string;
+  translation: string;
+  source: string;
+  surah?: number;
+  ayah?: number;
+  ayahEnd?: number;
+}
+const { arabic, translation, source, surah, ayah, ayahEnd } = Astro.props;
+const hasAudio = typeof surah === "number" && typeof ayah === "number";
+const urls = hasAudio ? ayahsAudioUrls(surah!, ayah!, ayahEnd) : [];
+---
+<figure class="verse">
+  <blockquote lang="ar" dir="rtl" class="verse__arabic">{arabic}</blockquote>
+  <figcaption class="verse__translation">“{translation}”</figcaption>
+  <cite class="verse__source">{source}</cite>
+  {hasAudio && (
+    <button class="verse__play" type="button" data-play-audio={JSON.stringify(urls)} aria-label="Dengarkan ayat">
+      ▶️ Dengarkan
+    </button>
+  )}
+</figure>
+
+<style>
+  .verse {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: #f4efe6;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+  }
+  .verse__arabic { margin: 0; font-size: 1.5rem; line-height: 1.9; color: #3a3328; }
+  .verse__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
+  .verse__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+  .verse__play {
+    margin-top: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+  }
+  .verse__play.is-playing { background: var(--secondary); }
+</style>
+```
+
+- [ ] **Step 4: Write `src/components/Hadith.astro`**
+
+```astro
+---
+interface Props {
+  arabic: string;
+  translation: string;
+  source: string;
+  link?: string;
+}
+const { arabic, translation, source, link } = Astro.props;
+---
+<figure class="hadith">
+  <blockquote lang="ar" dir="rtl" class="hadith__arabic">{arabic}</blockquote>
+  <figcaption class="hadith__translation">“{translation}”</figcaption>
+  <cite class="hadith__source">
+    {link ? <a href={link} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+  </cite>
+</figure>
+
+<style>
+  .hadith {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: #eef4f0;
+    border-left: 3px solid #2d8a4e;
+    border-radius: var(--radius);
+  }
+  .hadith__arabic { margin: 0; font-size: 1.4rem; line-height: 1.9; color: #2b2722; }
+  .hadith__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
+  .hadith__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+</style>
+```
+
+- [ ] **Step 5: Add the global audio player script to `src/layouts/Base.astro`**
+
+Add before `</body>` (alongside the reveal script):
+```astro
+<script>
+  let current: HTMLAudioElement | null = null;
+  let currentBtn: HTMLButtonElement | null = null;
+  document.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-play-audio]");
+    if (!btn) return;
+    e.preventDefault();
+    if (current && currentBtn === btn) {
+      current.pause();
+      current = null;
+      currentBtn?.classList.remove("is-playing");
+      currentBtn = null;
+      return;
+    }
+    current?.pause();
+    currentBtn?.classList.remove("is-playing");
+    const urls: string[] = JSON.parse(btn.dataset.playAudio ?? "[]");
+    if (urls.length === 0) return;
+    const play = (i: number) => {
+      if (i >= urls.length) { currentBtn?.classList.remove("is-playing"); current = null; currentBtn = null; return; }
+      current = new Audio(urls[i]);
+      current.onended = () => play(i + 1);
+      current.play();
+    };
+    currentBtn = btn;
+    btn.classList.add("is-playing");
+    play(0);
+  });
+</script>
+```
+
+- [ ] **Step 6: Render lessons on the detail page**
+
+In `src/pages/events/[slug].astro`, insert after the `<div class="detail__body">…</div>` block and before `<SourceList … />`:
+
+```astro
+      {entry.data.lessons && entry.data.lessons.length > 0 && (
+        <section class="lessons">
+          <h2>Pelajaran / Hikmah</h2>
+          <ol>
+            {entry.data.lessons.map((l) => <li>{l}</li>)}
+          </ol>
+        </section>
+      )}
+```
+
+And add scoped style:
+```css
+  .lessons { margin-top: 2rem; }
+  .lessons h2 { font-size: 1.1rem; }
+  .lessons ol { padding-left: 1.2rem; color: var(--muted); }
+  .lessons li { margin-bottom: 0.5rem; }
+```
+
+- [ ] **Step 7: Verify build**
+
+Run: `npx astro build`
+Expected: exit 0 (existing 34 files still validate with optional `lessons`).
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/content/config.ts src/lib/audio.ts src/lib/audio.test.ts src/components/Verse.astro src/components/Hadith.astro src/layouts/Base.astro src/pages/events/[slug].astro
+git commit -m "feat: add lessons field, verse/hadith components, and verse audio"
+```
+
+## Task 13: Enrich Jahiliyyah & Mecca events
+
+**Files:** Modify all 17 files in `src/content/events/` with era `jahiliyyah`
+or `mecca` (orders 1–17): `kelahiran-nabi`, `yatim-di-pengasuhan`,
+`perjalanan-ke-syam`, `perang-fijar-hilf-al-fudul`, `pernikahan-khadijah`,
+`peletakan-hajar-aswad`, `wahyu-pertama`, `dakwah-sembunyi`,
+`dakwah-terang-terangan`, `penindasan-quraisy`, `hijrah-ke-habasyah`,
+`islamnya-hamzah-dan-umar`, `pemboikotan-bani-hasyim`, `tahun-kesedihan`,
+`isra-miraj`, `baiat-aqabah-pertama`, `baiat-aqabah-kedua`.
+
+**Interfaces:** Follows the Content Enrichment Standard above. Uses `Verse`
+and `Hadith` components. Adds `lessons` to frontmatter.
+
+- [ ] **Step 1: Rewrite all 17 files** per the standard (detailed narrative
+  + dialogues + verses + hadith + lessons + sources).
+- [ ] **Step 2: Verify** — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3: Commit** — `git add src/content/events/ && git commit -m "feat: enrich jahiliyyah and mecca events"`
+
+## Task 14: Enrich Medina events
+
+**Files:** Modify all 11 files with era `medina` (orders 18–28):
+`hijrah-ke-madinah`, `masjid-nabawi-dan-persaudaraan`, `piagam-madinah`,
+`perang-badar`, `perang-uhud`, `perang-khandaq`, `perjanjian-hudaibiyah`,
+`surat-kepada-para-raja`, `perang-khaibar`, `umrah-qadha`, `perang-mutah`.
+
+- [ ] **Step 1: Rewrite all 11 files** per the standard.
+- [ ] **Step 2: Verify** — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3: Commit** — `git add src/content/events/ && git commit -m "feat: enrich medina events"`
+
+## Task 15: Enrich Post-Fath events
+
+**Files:** Modify all 6 files with era `post-fath` (orders 29–34):
+`fathu-makkah`, `perang-hunain-dan-thaif`, `perang-tabuk`, `tahun-delegasi`,
+`haji-wada`, `wafatnya-nabi`.
+
+- [ ] **Step 1: Rewrite all 6 files** per the standard.
+- [ ] **Step 2: Verify** — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3: Commit** — `git add src/content/events/ && git commit -m "feat: enrich post-fath events"`
+
+## Task 16: Enforce lessons, final validation & README
+
+**Files:**
+- Modify: `src/content/config.ts` (flip `lessons` to required)
+- Modify: `README.md` (document lessons + verse/hadith components)
+
+- [ ] **Step 1: Make `lessons` required**
+
+In `src/content/config.ts`, change:
+```ts
+      lessons: z.array(z.string()).optional(),
+```
+to:
+```ts
+      lessons: z.array(z.string()).min(1),
+```
+
+- [ ] **Step 2: Run the full test suite**
+
+Run: `npm test`
+Expected: all Vitest tests pass.
+
+- [ ] **Step 3: Run the production build**
+
+Run: `npm run build`
+Expected: exit 0; if any event is missing `lessons`, the build fails — add
+the missing `lessons` and re-run.
+
+- [ ] **Step 4: Update `README.md`** to mention the `lessons` frontmatter
+  field and the `Verse`/`Hadith` MDX components.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add -A
+git commit -m "feat: enforce lessons and finalize docs"
+```
+
+---
+
+# Phase 3 — Game-like UI, Gamification, PWA (added 2026-09-13)
+
+Execution order: Task 17 (design) → Task 12 (content structure) → Task 18–19
+(gamification) → Task 20 (PWA) → Tasks 13–15 (content enrichment) → Task 16
+(final). The design tokens below are the source of truth; existing components
+already reference `--card/--border/--radius/--muted/--accent/--bg`, so
+redefining them re-themes the app without touching every component.
+
+## Task 17: Game-like design system
+
+**Files:**
+- Modify: `package.json` (add fonts)
+- Modify: `src/styles/global.css` (tokens, fonts, animations, reduced-motion)
+- Modify: `src/layouts/Base.astro` (fonts, reveal-on-scroll script)
+- Modify: `src/lib/eras.ts` (bright era colors)
+- Modify: `src/components/EventCard.astro` (reveal + hover bounce)
+- Modify: `src/components/EraSection.astro`, `JumpNav.astro`, `SearchFilter.astro`, `ThemeChips.astro` (rounded/pill styling to match)
+
+- [ ] **Step 1: Add font deps to `package.json`**
+
+Add to `dependencies`: `"@fontsource/baloo-2": "^5.1.0"`, `"@fontsource/nunito": "^5.1.0"`.
+
+- [ ] **Step 2: Rewrite `src/styles/global.css`**
+
+```css
+:root {
+  --primary: #ff6b35;
+  --secondary: #00b4d8;
+  --accent: #ffd166;
+  --success: #06d6a0;
+  --purple: #9b5de5;
+  --pink: #f15bb5;
+  --bg: #fff9e6;
+  --card: #ffffff;
+  --ink: #2b2b3a;
+  --muted: #6b6b7b;
+  --border: #f0e6d2;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --font-display: "Baloo 2", "Amiri", sans-serif;
+  --font-body: "Nunito", sans-serif;
+  --shadow: 0 6px 0 rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; }
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* reveal-on-scroll */
+[data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; }
+[data-reveal].is-visible { opacity: 1; transform: none; }
+
+/* playful bounce on hover */
+.bouncy { transition: transform 0.15s ease; }
+.bouncy:hover { transform: translateY(-4px) scale(1.01); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  [data-reveal] { opacity: 1; transform: none; }
+}
+```
+
+- [ ] **Step 3: Update `src/layouts/Base.astro`**
+
+Import fonts and add a reveal-on-scroll observer script. Replace the font imports block with:
+
+```astro
+import "@fontsource/baloo-2/600.css";
+import "@fontsource/baloo-2/700.css";
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/amiri/400.css";
+import "@fontsource/amiri/700.css";
+```
+
+Add before `</body>`:
+
+```astro
+<script>
+  const reveal = () => {
+    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); } }),
+      { threshold: 0.1 },
+    );
+    els.forEach((el) => io.observe(el));
+  };
+  reveal();
+</script>
+```
+
+- [ ] **Step 4: Update era colors in `src/lib/eras.ts`**
+
+Replace the `color` values: jahiliyyah `#c98a2b`, mecca `#e76f51`, medina `#2a9d8f`, post-fath `#457b9d`.
+
+- [ ] **Step 5: Add reveal + bounce to `EventCard.astro`**
+
+Add `data-reveal` and `bouncy` to the `<article>`: `<article class="event-card bouncy" data-event data-reveal ...>`.
+
+- [ ] **Step 6: Restyle chips/nav to rounded pill look**
+
+In `ThemeChips.astro`, `JumpNav.astro`, `SearchFilter.astro`: use `border-radius: 999px`, add `font-family: var(--font-display)`, and use the bright tokens (`--secondary`/`--purple`/`--pink`) for chip accents. Keep the structure; only adjust colors/radius.
+
+- [ ] **Step 7: Install and build**
+
+Run: `npm install && npx astro build`
+Expected: exit 0, no console errors.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add -A && git commit -m "feat: game-like design system"
+```
+
+## Task 18: Gamification logic + tests
+
+**Files:**
+- Create: `src/lib/gamification.ts`
+- Test: `src/lib/gamification.test.ts`
+
+**Interfaces:** pure functions below (no DOM, no localStorage). Consumed by Task 19 UI.
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+import { describe, it, expect } from "vitest";
+import { computeLevel, awardRead, computeProgress, computeBadges, updateStreak, initialState, POINTS_PER_READ } from "./gamification";
+
+const events = [
+  { id: "a", era: "jahiliyyah" }, { id: "b", era: "jahiliyyah" },
+  { id: "c", era: "mecca" }, { id: "d", era: "medina" }, { id: "e", era: "post-fath" },
+];
+
+describe("computeLevel", () => {
+  it("returns level 1 at 0 points", () => {
+    const l = computeLevel(0);
+    expect(l.level).toBe(1);
+    expect(l.name).toBe("Musafir Kecil");
+  });
+  it("returns a higher level past a threshold", () => {
+    expect(computeLevel(60).level).toBe(2);
+  });
+  it("caps at max level with progress 1", () => {
+    const l = computeLevel(500);
+    expect(l.nextMin).toBeNull();
+    expect(l.progress).toBe(1);
+  });
+});
+
+describe("awardRead", () => {
+  it("awards points once per event", () => {
+    const s0 = initialState();
+    const s1 = awardRead(s0, "a");
+    expect(s1.points).toBe(POINTS_PER_READ);
+    expect(s1.readIds).toEqual(["a"]);
+    expect(awardRead(s1, "a")).toBe(s1);
+  });
+});
+
+describe("computeProgress", () => {
+  it("computes percent", () => {
+    const s = { ...initialState(), readIds: ["a", "b"] };
+    expect(computeProgress(s, 4)).toEqual({ read: 2, total: 4, percent: 50 });
+  });
+});
+
+describe("computeBadges", () => {
+  it("earns first-read and era badges", () => {
+    const s = { ...initialState(), readIds: ["a", "b"] };
+    const ids = computeBadges(s, events).map((b) => b.id);
+    expect(ids).toContain("first-read");
+    expect(ids).toContain("era-jahiliyyah");
+    expect(ids).not.toContain("all-read");
+  });
+  it("earns all-read when every event is read", () => {
+    const s = { ...initialState(), readIds: events.map((e) => e.id) };
+    expect(computeBadges(s, events).map((b) => b.id)).toContain("all-read");
+  });
+});
+
+describe("updateStreak", () => {
+  it("starts streak at 1 on first visit", () => {
+    expect(updateStreak(initialState(), "2026-09-13").streak).toBe(1);
+  });
+  it("increments on consecutive days", () => {
+    const s1 = updateStreak(initialState(), "2026-09-12");
+    expect(updateStreak(s1, "2026-09-13").streak).toBe(2);
+  });
+  it("resets after a gap", () => {
+    const s1 = updateStreak(initialState(), "2026-09-10");
+    expect(updateStreak(s1, "2026-09-13").streak).toBe(1);
+  });
+});
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `npx vitest run src/lib/gamification.test.ts` — expect FAIL (cannot resolve `./gamification`).
+
+- [ ] **Step 3: Write `src/lib/gamification.ts`** (implement all functions + constants/types per the tests, with `POINTS_PER_READ = 10`, `LEVELS`, `BADGES`, `initialState`, `PlayerState`, `Badge`, `EventMeta`).
+
+- [ ] **Step 4: Run to verify it passes**
+
+Run: `npx vitest run src/lib/gamification.test.ts` — expect all pass.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/gamification.ts src/lib/gamification.test.ts && git commit -m "feat: gamification logic"
+```
+
+## Task 19: Gamification UI & reading rewards
+
+**Files:**
+- Create: `src/components/PlayerHeader.astro`
+- Modify: `src/layouts/Base.astro` (render `<PlayerHeader />`)
+- Modify: `src/pages/events/[slug].astro` (mark read + award + confetti)
+- Modify: `src/components/EventCard.astro` (read checkmark via `data-read`)
+
+**Interfaces:** consumes `computeLevel/awardRead/computeProgress/computeBadges/updateStreak` and `initialState` from `src/lib/gamification.ts`. Persists `PlayerState` to `localStorage` key `"siroh-player"`. Uses a global `window` event `"siroh:updated"` to sync the header.
+
+- [ ] **Step 1: Write `src/components/PlayerHeader.astro`**
+
+A sticky top bar showing, left-to-right: level icon + name, points ("X poin"), streak ("🔥 N hari"), and a progress bar with "N%" label. Includes a client script that loads state from `localStorage`, renders via `computeLevel`/`computeProgress` (with total = 34), and listens for the `"siroh:updated"` event to re-render.
+
+```astro
+---
+// PlayerHeader.astro — sticky gamification bar
+---
+<header class="player" id="player-header">
+  <div class="player__level"><span id="level-icon">🐪</span> <strong id="level-name">Musafir Kecil</strong></div>
+  <div class="player__stats">
+    <span id="points">0 poin</span>
+    <span id="streak">🔥 0 hari</span>
+  </div>
+  <div class="player__progress">
+    <div class="player__bar"><div id="progress-fill"></div></div>
+    <span id="progress-label">0%</span>
+  </div>
+</header>
+
+<style>
+  .player {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    background: linear-gradient(90deg, var(--primary), var(--pink));
+    color: #fff; padding: 0.6rem 1rem; border-radius: 0 0 var(--radius) var(--radius);
+    font-family: var(--font-display);
+  }
+  .player__level { display: flex; align-items: center; gap: 0.4rem; }
+  .player__stats { display: flex; gap: 1rem; }
+  .player__progress { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 120px; }
+  .player__bar { flex: 1; height: 12px; background: rgba(255,255,255,0.35); border-radius: 999px; overflow: hidden; }
+  #progress-fill { height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.4s ease; }
+</style>
+
+<script>
+  import { computeLevel, computeProgress, initialState } from "../lib/gamification";
+
+  const TOTAL = 34;
+  const KEY = "siroh-player";
+  const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
+
+  function render() {
+    const s = load();
+    const lvl = computeLevel(s.points);
+    const prog = computeProgress(s, TOTAL);
+    document.getElementById("level-icon")!.textContent = lvl.icon;
+    document.getElementById("level-name")!.textContent = lvl.name;
+    document.getElementById("points")!.textContent = `${s.points} poin`;
+    document.getElementById("streak")!.textContent = `🔥 ${s.streak} hari`;
+    (document.getElementById("progress-fill") as HTMLElement).style.width = `${prog.percent}%`;
+    document.getElementById("progress-label")!.textContent = `${prog.percent}%`;
+  }
+
+  render();
+  window.addEventListener("siroh:updated", render);
+</script>
+```
+
+- [ ] **Step 2: Render `<PlayerHeader />` in `Base.astro`**
+
+Add `import PlayerHeader from "../components/PlayerHeader.astro";` and render `<PlayerHeader />` immediately after `<body>`'s opening `<slot />`? No — render it as the first child of `<body>`, before `<slot />`:
+
+```astro
+<body>
+  <PlayerHeader />
+  <slot />
+</body>
+```
+
+- [ ] **Step 3: Mark read + award on the detail page**
+
+In `[slug].astro`, add a `<script>` that on load: loads state, `updateStreak(state, today)` + `awardRead(state, slug)` (using the current event slug), saves, dispatches `window.dispatchEvent(new Event("siroh:updated"))`, and shows a "+10 poin!" toast plus a small confetti burst. Confetti is a tiny inline function (no dependency) that appends ~30 absolutely-positioned colored divs that animate and remove themselves. Get the slug in the script from a `data-slug` attribute on `<main>`.
+
+- [ ] **Step 4: Read checkmark on cards**
+
+In `EventCard.astro`, add a client script that reads state and adds a `data-read` class (a ✓ badge) to cards whose id is in `readIds`, re-rendering on `"siroh:updated"`. Cards carry `data-event-id` (the event id).
+
+- [ ] **Step 5: Build and verify**
+
+Run: `npx astro build`
+Expected: exit 0. Manual check: reading an event increments points and the header progress bar.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/components/PlayerHeader.astro src/layouts/Base.astro src/pages/events/[slug].astro src/components/EventCard.astro
+git commit -m "feat: gamification UI and reading rewards"
+```
+
+## Task 20: PWA
+
+**Files:**
+- Modify: `package.json` (add `@vite-pwa/astro`)
+- Modify: `astro.config.mjs`
+- Create: `public/icons/icon.svg`
+- Modify: `src/layouts/Base.astro` (theme-color + apple-touch meta)
+
+- [ ] **Step 1: Add dependency** — `"@vite-pwa/astro": "^1.0.0"` to `dependencies`.
+
+- [ ] **Step 2: Write `public/icons/icon.svg`** — a simple crescent-and-star motif on the primary color (a 512×512 SVG).
+
+- [ ] **Step 3: Configure `astro.config.mjs`**
+
+```js
+import { defineConfig } from "astro/config";
+import mdx from "@astrojs/mdx";
+import { VitePWA } from "@vite-pwa/astro";
+
+export default defineConfig({
+  integrations: [
+    mdx(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["icons/icon.svg"],
+      manifest: {
+        name: "Sirah Nabawiyah",
+        short_name: "Sirah",
+        description: "Garis waktu interaktif kehidupan Nabi Muhammad ﷺ untuk anak-anak.",
+        theme_color: "#ff6b35",
+        background_color: "#fff9e6",
+        display: "standalone",
+        start_url: "/",
+      },
+      pwaAssets: { image: "public/icons/icon.svg" },
+    }),
+  ],
+});
+```
+
+- [ ] **Step 4: Add meta to `Base.astro`**
+
+```astro
+<meta name="theme-color" content="#ff6b35" />
+<link rel="apple-touch-icon" href="/icons/icon.svg" />
+```
+
+- [ ] **Step 5: Install and build**
+
+Run: `npm install && npx astro build`
+Expected: exit 0; `dist/` contains `manifest.webmanifest`, `sw.js` (or similar), and generated icon files.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add -A && git commit -m "feat: pwa support"
+```
+
+---
+
+# Phase 4 — Arabic dialogues + retrofit (added 2026-09-13)
+
+## Task 12b: Dialogue component
+
+**Files:** Create `src/components/Dialogue.astro`.
+
+- [ ] **Step 1: Write `src/components/Dialogue.astro`**
+
+```astro
+---
+interface Props {
+  arabic: string;
+  translation: string;
+  source: string;
+  link?: string;
+}
+const { arabic, translation, source, link } = Astro.props;
+---
+<figure class="dialogue">
+  <blockquote lang="ar" dir="rtl" class="dialogue__arabic">{arabic}</blockquote>
+  <figcaption class="dialogue__translation">“{translation}”</figcaption>
+  <cite class="dialogue__source">
+    {link ? <a href={link} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+  </cite>
+</figure>
+
+<style>
+  .dialogue {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: #fdf0f5;
+    border-left: 3px solid var(--pink);
+    border-radius: var(--radius);
+  }
+  .dialogue__arabic { margin: 0; font-size: 1.35rem; line-height: 1.9; color: #3a2b33; }
+  .dialogue__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
+  .dialogue__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+</style>
+```
+
+- [ ] **Step 2: Build** — `npx astro build` (exit 0).
+
+- [ ] **Step 3: Commit** — `git add src/components/Dialogue.astro && git commit -m "feat: add dialogue component"`
+
+## Task 21: Retrofit Arabic dialogues into Jahiliyyah/Mecca & Medina events
+
+**Files:** Modify the 28 event files enriched in Tasks 13 & 14 (`src/content/events/*.mdx` with era `jahiliyyah`, `mecca`, or `medina`).
+
+- [ ] **Step 1:** For every dialogue/quoted conversation, replace the inline
+  Indonesian quote with a `<Dialogue arabic="…" translation="…" source="…" />`
+  component carrying the Arabic original + Indonesian translation + a clear
+  reference (hadith perawi/number + `sunnah.com` link, or seerah chapter).
+  Import `Dialogue` at the top of each file. Do NOT alter frontmatter or
+  other prose; only dialogue treatment.
+- [ ] **Step 2:** Verify — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3:** Commit — `git add src/content/events/ && git commit -m "feat: add arabic to dialogues (jahiliyyah/mecca/medina)"`

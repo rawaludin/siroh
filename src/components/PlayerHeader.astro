@@ -1,0 +1,55 @@
+---
+interface Props {
+  total?: number;
+}
+const { total = 0 } = Astro.props;
+---
+<header class="player" id="player-header" data-total={total}>
+  <div class="player__level"><span id="level-icon">🐪</span> <strong id="level-name">Musafir Kecil</strong></div>
+  <div class="player__stats">
+    <span id="points">0 poin</span>
+    <span id="streak">🔥 0 hari</span>
+  </div>
+  <div class="player__progress">
+    <div class="player__bar"><div id="progress-fill"></div></div>
+    <span id="progress-label">0%</span>
+  </div>
+</header>
+
+<style>
+  .player {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    background: linear-gradient(90deg, var(--primary), var(--pink));
+    color: #fff; padding: 0.6rem 1rem; border-radius: 0 0 var(--radius) var(--radius);
+    font-family: var(--font-display);
+  }
+  .player__level { display: flex; align-items: center; gap: 0.4rem; }
+  .player__stats { display: flex; gap: 1rem; }
+  .player__progress { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 120px; }
+  .player__bar { flex: 1; height: 12px; background: rgba(255,255,255,0.35); border-radius: 999px; overflow: hidden; }
+  #progress-fill { height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.4s ease; }
+</style>
+
+<script>
+  import { computeLevel, computeProgress, initialState } from "../lib/gamification";
+
+  const TOTAL = Number(document.getElementById("player-header")?.dataset.total ?? 0);
+  const KEY = "siroh-player";
+  const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
+
+  function render() {
+    const s = load();
+    const lvl = computeLevel(s.points);
+    const prog = computeProgress(s, TOTAL);
+    document.getElementById("level-icon")!.textContent = lvl.icon;
+    document.getElementById("level-name")!.textContent = lvl.name;
+    document.getElementById("points")!.textContent = `${s.points} poin`;
+    document.getElementById("streak")!.textContent = `🔥 ${s.streak} hari`;
+    (document.getElementById("progress-fill") as HTMLElement).style.width = `${prog.percent}%`;
+    document.getElementById("progress-label")!.textContent = `${prog.percent}%`;
+  }
+
+  render();
+  window.addEventListener("siroh:updated", render);
+</script>

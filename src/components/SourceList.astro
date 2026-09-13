@@ -1,0 +1,37 @@
+---
+interface Source {
+  title: string;
+  author: string;
+  reference: string;
+  link?: string;
+}
+
+interface Props {
+  sources: Source[];
+}
+
+const { sources } = Astro.props;
+---
+
+<section class="sources">
+  <h2>Sumber / Referensi</h2>
+  <ul>
+    {sources.map((s) => (
+      <li>
+        {s.link ? (
+          <a href={s.link} target="_blank" rel="noopener noreferrer">{s.title}</a>
+        ) : (
+          <span>{s.title}</span>
+        )}{" "}
+        — {s.author}, <em>{s.reference}</em>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .sources { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+  .sources h2 { font-size: 1.1rem; }
+  .sources ul { padding-left: 1.2rem; color: var(--muted); }
+  .sources li { margin-bottom: 0.5rem; }
+</style>

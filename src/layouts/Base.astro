@@ -1,0 +1,124 @@
+---
+import "@fontsource/baloo-2/600.css";
+import "@fontsource/baloo-2/700.css";
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/amiri/400.css";
+import "@fontsource/amiri/700.css";
+import "../styles/global.css";
+import PlayerHeader from "../components/PlayerHeader.astro";
+import { pwaInfo } from "virtual:pwa-info";
+
+interface Props {
+  title: string;
+  description?: string;
+  total?: number;
+}
+
+const { title, description, total } = Astro.props;
+
+const WA_NUMBER = "628112071744";
+const WA_MESSAGE = [
+  "Assalamu'alaikum, saya ingin memberi masukan untuk aplikasi Sirah Nabawiyah.",
+  "",
+  "Nama: ",
+  "Nomor HP/WA: ",
+  "Email (opsional): ",
+  "",
+  "Masukan saya: ",
+].join("\n");
+const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)}`;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ff6b35" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.png" />
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <noscript><style>[data-reveal]{opacity:1;transform:none}</style></noscript>
+  </head>
+  <body>
+    <PlayerHeader total={total} />
+    <slot />
+    <footer class="site-footer">
+      <a
+        class="site-footer__feedback"
+        href={waLink}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        💬 Ada masukan? Kirim via WhatsApp
+      </a>
+    </footer>
+    <script>
+      import { registerSW } from "virtual:pwa-register";
+      registerSW({ immediate: true });
+    </script>
+    <script>
+      const reveal = () => {
+        const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
+        const io = new IntersectionObserver(
+          (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); } }),
+          { threshold: 0.1 },
+        );
+        els.forEach((el) => io.observe(el));
+      };
+      reveal();
+    </script>
+    <script>
+      let current: HTMLAudioElement | null = null;
+      let currentBtn: HTMLButtonElement | null = null;
+      const setPlaying = (btn: HTMLButtonElement | null, playing: boolean) => {
+        if (!btn) return;
+        btn.classList.toggle("is-playing", playing);
+        btn.setAttribute("aria-pressed", playing ? "true" : "false");
+      };
+      document.addEventListener("click", (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-play-audio]");
+        if (!btn) return;
+        e.preventDefault();
+        if (current && currentBtn === btn) {
+          current.pause();
+          current = null;
+          setPlaying(currentBtn, false);
+          currentBtn = null;
+          return;
+        }
+        current?.pause();
+        setPlaying(currentBtn, false);
+        const urls: string[] = JSON.parse(btn.dataset.playAudio ?? "[]");
+        if (urls.length === 0) return;
+        const play = (i: number) => {
+          if (i >= urls.length) { setPlaying(currentBtn, false); current = null; currentBtn = null; return; }
+          current = new Audio(urls[i]);
+          current.onended = () => play(i + 1);
+          current.play();
+        };
+        currentBtn = btn;
+        setPlaying(btn, true);
+        play(0);
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .site-footer {
+    text-align: center;
+    padding: 2rem 1rem 2.5rem;
+  }
+  .site-footer__feedback {
+    display: inline-block;
+    font-family: var(--font-display);
+    background: var(--success);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.5rem 1.2rem;
+  }
+  .site-footer__feedback:hover { text-decoration: none; opacity: 0.92; }
+</style>

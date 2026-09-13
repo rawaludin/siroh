@@ -1,0 +1,34 @@
+---
+import Base from "../layouts/Base.astro";
+import JumpNav from "../components/JumpNav.astro";
+import SearchFilter from "../components/SearchFilter.astro";
+import EraSection from "../components/EraSection.astro";
+import Achievements from "../components/Achievements.astro";
+import { getCollection } from "astro:content";
+import { sortChronological, groupByEra, toEventData } from "../lib/events";
+
+const events = await getCollection("events");
+const sorted = sortChronological(events.map(toEventData));
+const groups = groupByEra(sorted);
+---
+
+<Base title="Sirah Nabawiyah — Garis Waktu Kehidupan Nabi ﷺ" description="Garis waktu interaktif perjalanan hidup Nabi Muhammad ﷺ." total={sorted.length}>
+  <main class="page">
+    <h1 class="page__title">Sirah Nabawiyah</h1>
+    <p class="page__subtitle">Garis waktu kehidupan Nabi Muhammad ﷺ</p>
+    <SearchFilter />
+    <JumpNav />
+    <div class="timeline">
+      {groups.map((g) => (
+        <EraSection era={g.era} events={g.items} />
+      ))}
+    </div>
+    <Achievements events={sorted.map((e) => ({ id: e.id, era: e.era }))} />
+  </main>
+</Base>
+
+<style>
+  .page { max-width: 900px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .page__title { margin: 1rem 0 0; }
+  .page__subtitle { margin: 0 0 1rem; color: var(--muted); }
+</style>

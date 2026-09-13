@@ -1,0 +1,171 @@
+---
+import Base from "../../layouts/Base.astro";
+import Arabic from "../../components/Arabic.astro";
+import SourceList from "../../components/SourceList.astro";
+import ThemeChips from "../../components/ThemeChips.astro";
+import { getCollection, render } from "astro:content";
+import { sortChronological, toEventData } from "../../lib/events";
+import { getEra } from "../../lib/eras";
+
+export async function getStaticPaths() {
+  const events = await getCollection("events");
+  return events.map((e) => ({ params: { slug: e.slug }, props: { entry: e } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const all = sortChronological((await getCollection("events")).map(toEventData));
+const index = all.findIndex((e) => e.id === entry.slug);
+const prev = index > 0 ? all[index - 1] : undefined;
+const next = index < all.length - 1 ? all[index + 1] : undefined;
+const era = getEra(entry.data.era);
+const related = (entry.data.related ?? [])
+  .map((id) => all.find((e) => e.id === id))
+  .filter((e): e is NonNullable<typeof e> => Boolean(e));
+---
+
+<Base title={`${entry.data.title} — Sirah Nabawiyah`} description={entry.data.summary} total={all.length}>
+  <main class="detail" data-slug={entry.slug}>
+    <a href="/" class="detail__back">← Kembali ke garis waktu</a>
+    <article class="detail__article">
+      <header class="detail__header" style={`--era-color: ${era.color}`}>
+        <span class="detail__era">{era.label}</span>
+        <span class="detail__year">{entry.data.year}</span>
+        <h1 class="detail__title">{entry.data.title}</h1>
+        <span class="detail__title-ar"><Arabic text={entry.data.titleAr} /></span>
+        {entry.data.location && <p class="detail__location">Lokasi: {entry.data.location}</p>}
+        <ThemeChips themes={entry.data.themes} />
+      </header>
+
+      <div class="detail__body">
+        <Content />
+      </div>
+
+      {entry.data.lessons && entry.data.lessons.length > 0 && (
+        <section class="lessons">
+          <h2>Pelajaran / Hikmah</h2>
+          <ol>
+            {entry.data.lessons.map((l) => <li>{l}</li>)}
+          </ol>
+        </section>
+      )}
+
+      <SourceList sources={entry.data.sources} />
+    </article>
+
+    {related.length > 0 && (
+      <nav class="related">
+        <h2>Peristiwa terkait</h2>
+        <ul>
+          {related.map((r) => (
+            <li><a href={`/events/${r.id}/`}>{r.title}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    <nav class="pager">
+      {prev ? <a href={`/events/${prev.id}/`}>← {prev.title}</a> : <span />}
+      {next ? <a href={`/events/${next.id}/`}>{next.title} →</a> : <span />}
+    </nav>
+  </main>
+</Base>
+
+<script>
+  import { awardRead, initialState, updateStreak } from "../../lib/gamification";
+
+  const KEY = "siroh-player";
+  const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
+  const save = (s: ReturnType<typeof initialState>) => localStorage.setItem(KEY, JSON.stringify(s));
+
+  const today = new Date().toISOString().slice(0, 10);
+  const slug = document.querySelector<HTMLElement>("main[data-slug]")?.dataset.slug;
+  if (slug) {
+    const before = load();
+    let next = updateStreak(before, today);
+    next = awardRead(next, slug);
+    save(next);
+    window.dispatchEvent(new Event("siroh:updated"));
+    const gained = next.points - before.points;
+    if (gained > 0) {
+      toast(`+${gained} poin!`);
+      confetti();
+    }
+  }
+
+  function toast(msg: string) {
+    const el = document.createElement("div");
+    el.textContent = msg;
+    Object.assign(el.style, {
+      position: "fixed",
+      bottom: "24px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      background: "var(--success)",
+      color: "#fff",
+      padding: "0.6rem 1.2rem",
+      borderRadius: "999px",
+      fontFamily: "var(--font-display)",
+      fontWeight: "700",
+      boxShadow: "var(--shadow)",
+      zIndex: "50",
+      transition: "opacity 0.4s ease, transform 0.4s ease",
+    } as CSSStyleDeclaration);
+    document.body.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transform = "translateX(-50%) translateY(10px)";
+    }, 2000);
+    setTimeout(() => el.remove(), 2500);
+  }
+
+  function confetti() {
+    const colors = ["#ff6b35", "#ffd166", "#06d6a0", "#00b4d8", "#f15bb5", "#9b5de5"];
+    for (let i = 0; i < 30; i++) {
+      const c = document.createElement("div");
+      const size = 6 + Math.random() * 8;
+      const x = 20 + Math.random() * 60;
+      const spread = (Math.random() - 0.5) * 220;
+      Object.assign(c.style, {
+        position: "fixed",
+        top: "60px",
+        left: `${x}%`,
+        width: `${size}px`,
+        height: `${size * 0.6}px`,
+        background: colors[i % colors.length],
+        borderRadius: "2px",
+        zIndex: "60",
+        pointerEvents: "none",
+      } as CSSStyleDeclaration);
+      document.body.appendChild(c);
+      const anim = c.animate(
+        [
+          { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
+          { transform: `translate(${spread}px, ${320 + Math.random() * 220}px) rotate(${360 + Math.random() * 360}deg)`, opacity: 0 },
+        ],
+        { duration: 900 + Math.random() * 800, easing: "ease-out" },
+      );
+      anim.onfinish = () => c.remove();
+    }
+  }
+</script>
+
+<style>
+  .detail { max-width: 760px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .detail__back { font-size: 0.9rem; }
+  .detail__header { border-left: 4px solid var(--era-color); padding-left: 1rem; margin: 1.25rem 0; }
+  .detail__era { color: var(--era-color); font-size: 0.85rem; font-weight: 600; }
+  .detail__year { display: block; color: var(--muted); font-size: 0.9rem; margin-top: 0.2rem; }
+  .detail__title { margin: 0.3rem 0; }
+  .detail__title-ar { display: block; color: var(--muted); font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .detail__location { color: var(--muted); font-size: 0.9rem; margin: 0.25rem 0 0.75rem; }
+  .detail__body { font-size: 1.05rem; }
+  .detail__body :global(.arabic) { font-size: 1.2em; }
+  .lessons { margin-top: 2rem; }
+  .lessons h2 { font-size: 1.1rem; }
+  .lessons ol { padding-left: 1.2rem; color: var(--muted); }
+  .lessons li { margin-bottom: 0.5rem; }
+  .related, .pager { margin-top: 2rem; }
+  .pager { display: flex; justify-content: space-between; gap: 1rem; }
+</style>

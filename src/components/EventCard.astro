@@ -1,0 +1,99 @@
+---
+import Arabic from "./Arabic.astro";
+import ThemeChips from "./ThemeChips.astro";
+
+interface Props {
+  id: string;
+  year: string;
+  title: string;
+  titleAr: string;
+  summary: string;
+  themes: string[];
+  era: string;
+  searchText: string;
+}
+
+const { id, year, title, titleAr, summary, themes, era, searchText } = Astro.props;
+---
+
+<article
+  class="event-card bouncy"
+  data-event
+  data-event-id={id}
+  data-reveal
+  data-era={era}
+  data-themes={JSON.stringify(themes)}
+  data-search={searchText}
+>
+  <a href={`/events/${id}/`} class="event-card__link">
+    <span class="event-card__year">{year}</span>
+    <h3 class="event-card__title">{title}</h3>
+    <span class="event-card__title-ar"><Arabic text={titleAr} /></span>
+    <p class="event-card__summary">{summary}</p>
+    <ThemeChips themes={themes} />
+  </a>
+</article>
+
+<style>
+  .event-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    transition: box-shadow 0.15s ease;
+    position: relative;
+  }
+  .event-card.data-read::after {
+    content: "✓";
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--success);
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .event-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+  .event-card__link { color: inherit; display: block; }
+  .event-card__link:hover { text-decoration: none; }
+  .event-card__year {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--ink);
+    background: var(--era-color, var(--accent));
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .event-card__title { margin: 0; font-size: 1.1rem; }
+  .event-card__title-ar { display: block; color: var(--muted); margin: 0.1rem 0 0.4rem; }
+  .event-card__summary { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; }
+  .event-card[hidden] { display: none; }
+</style>
+
+<script>
+  import { initialState } from "../lib/gamification";
+
+  const KEY = "siroh-player";
+  const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
+
+  function render() {
+    const s = load();
+    document.querySelectorAll<HTMLElement>("[data-event-id]").forEach((card) => {
+      const id = card.dataset.eventId;
+      if (id && s.readIds.includes(id)) card.classList.add("data-read");
+      else card.classList.remove("data-read");
+    });
+  }
+
+  render();
+  window.addEventListener("siroh:updated", render);
+</script>
