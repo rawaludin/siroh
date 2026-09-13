@@ -1,0 +1,122 @@
+---
+import { ERAS } from "../lib/eras";
+
+const themes: Array<{ id: string; label: string }> = [
+  { id: "kelahiran", label: "Kelahiran" },
+  { id: "keluarga", label: "Keluarga" },
+  { id: "wahyu", label: "Wahyu" },
+  { id: "dakwah", label: "Dakwah" },
+  { id: "hijrah", label: "Hijrah" },
+  { id: "perang", label: "Perang" },
+  { id: "perjanjian", label: "Perjanjian" },
+  { id: "diplomasi", label: "Diplomasi" },
+  { id: "penaklukan", label: "Penaklukan" },
+  { id: "haji", label: "Haji" },
+  { id: "kepemimpinan", label: "Kepemimpinan" },
+  { id: "pemboikotan", label: "Pemboikotan" },
+  { id: "isra-miraj", label: "Isra' Mi'raj" },
+  { id: "persaudaraan", label: "Persaudaraan" },
+  { id: "masa-kecil", label: "Masa Kecil" },
+  { id: "masa-muda", label: "Masa Muda" },
+];
+---
+
+<div class="filter">
+  <input
+    type="search"
+    id="search-input"
+    class="filter__search"
+    placeholder="Cari peristiwa…"
+    aria-label="Cari peristiwa"
+  />
+
+  <fieldset class="filter__group">
+    <legend>Periode</legend>
+    {ERAS.map((era) => (
+      <label class="filter__chip">
+        <input type="checkbox" value={era.id} data-era-filter /> {era.label}
+      </label>
+    ))}
+  </fieldset>
+
+  <fieldset class="filter__group">
+    <legend>Tema</legend>
+    {themes.map((t) => (
+      <label class="filter__chip">
+        <input type="checkbox" value={t.id} data-theme-filter /> {t.label}
+      </label>
+    ))}
+  </fieldset>
+
+  <p class="filter__count" id="result-count" aria-live="polite"></p>
+</div>
+
+<style>
+  .filter { margin: 1rem 0 1.5rem; }
+  .filter__search {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+  }
+  .filter__group { border: none; padding: 0; margin: 0.75rem 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .filter__group legend { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.35rem; width: 100%; }
+  .filter__chip {
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    cursor: pointer;
+  }
+  .filter__chip input { display: none; }
+  .filter__chip:has(input:checked) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .filter__count { color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0; }
+</style>
+
+<script>
+  import { matchesFilter } from "../lib/events";
+  import type { EraId } from "../lib/eras";
+
+  const input = document.getElementById("search-input") as HTMLInputElement;
+  const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-event]"));
+  const count = document.getElementById("result-count")!;
+
+  function readFilters() {
+    const eras = Array.from(
+      document.querySelectorAll<HTMLInputElement>("[data-era-filter]:checked"),
+    ).map((el) => el.value as EraId);
+    const themes = Array.from(
+      document.querySelectorAll<HTMLInputElement>("[data-theme-filter]:checked"),
+    ).map((el) => el.value);
+    return { query: input.value, eras, themes };
+  }
+
+  function apply() {
+    const filters = readFilters();
+    let visible = 0;
+    for (const card of cards) {
+      const item = {
+        era: card.dataset.era as EraId,
+        themes: JSON.parse(card.dataset.themes ?? "[]") as string[],
+        searchText: card.dataset.search ?? "",
+      };
+      const show = matchesFilter(item, filters);
+      card.hidden = !show;
+      if (show) visible++;
+    }
+
+    for (const section of document.querySelectorAll<HTMLElement>("[data-era-section]")) {
+      const anyVisible = section.querySelectorAll("[data-event]:not([hidden])").length > 0;
+      section.style.opacity = anyVisible ? "1" : "0.35";
+    }
+
+    count.textContent = `${visible} dari ${cards.length} peristiwa`;
+  }
+
+  input.addEventListener("input", apply);
+  document.querySelectorAll<HTMLInputElement>("[data-era-filter], [data-theme-filter]").forEach((el) => {
+    el.addEventListener("change", apply);
+  });
+  apply();
+</script>

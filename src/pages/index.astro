@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import JumpNav from "../components/JumpNav.astro";
+import SearchFilter from "../components/SearchFilter.astro";
 import EraSection from "../components/EraSection.astro";
 import { getCollection } from "astro:content";
 import { sortChronological, groupByEra, toEventData } from "../lib/events";
@@ -14,6 +15,7 @@ const groups = groupByEra(sorted);
   <main class="page">
     <h1 class="page__title">Sirah Nabawiyah</h1>
     <p class="page__subtitle">Garis waktu kehidupan Nabi Muhammad ﷺ</p>
+    <SearchFilter />
     <JumpNav />
     <div class="timeline">
       {groups.map((g) => (
