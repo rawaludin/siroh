@@ -18,7 +18,7 @@ const urls = hasAudio ? ayahsAudioUrls(surah!, ayah!, ayahEnd) : [];
   <figcaption class="verse__translation">“{translation}”</figcaption>
   <cite class="verse__source">{source}</cite>
   {hasAudio && (
-    <button class="verse__play" type="button" data-play-audio={JSON.stringify(urls)} aria-label="Dengarkan ayat">
+    <button class="verse__play" type="button" data-play-audio={JSON.stringify(urls)} aria-label="Dengarkan ayat" aria-pressed="false">
       ▶️ Dengarkan
     </button>
   )}

@@ -50,7 +50,7 @@ export function toEventData(entry: EventEntry): EventData {
     themes: entry.data.themes,
     sources: entry.data.sources,
     related: entry.data.related,
-    searchText: [entry.data.title, entry.data.titleAr, entry.data.summary, entry.body ?? ""]
+    searchText: [entry.data.title, entry.data.titleAr, entry.data.summary, ...(entry.data.lessons ?? []), entry.data.location ?? ""]
       .join(" ")
       .toLowerCase(),
   };

@@ -25,7 +25,7 @@ const related = (entry.data.related ?? [])
   .filter((e): e is NonNullable<typeof e> => Boolean(e));
 ---
 
-<Base title={`${entry.data.title} — Sirah Nabawiyah`} description={entry.data.summary}>
+<Base title={`${entry.data.title} — Sirah Nabawiyah`} description={entry.data.summary} total={all.length}>
   <main class="detail" data-slug={entry.slug}>
     <a href="/" class="detail__back">← Kembali ke garis waktu</a>
     <article class="detail__article">

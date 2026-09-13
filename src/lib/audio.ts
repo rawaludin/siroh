@@ -8,6 +8,8 @@ export function ayahsAudioUrls(
   ayahEnd?: number,
   reciter: string = DEFAULT_RECITER,
 ): string[] {
+  if (surah <= 0 || ayah <= 0) return [];
+  if (ayahEnd !== undefined && ayahEnd < ayah) return [];
   const end = ayahEnd ?? ayah;
   const urls: string[] = [];
   for (let a = ayah; a <= end; a++) {

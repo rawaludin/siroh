@@ -21,6 +21,7 @@ const { era, events } = Astro.props;
   <div class="era__timeline">
     {events.map((e) => <EventCard {...e} />)}
   </div>
+  <p class="era__empty" data-era-empty hidden>Tidak ada peristiwa yang cocok dengan filter.</p>
 </section>
 
 <style>
@@ -44,9 +45,10 @@ const { era, events } = Astro.props;
   @media (min-width: 720px) {
     .era__timeline { grid-template-columns: 1fr 1fr; }
   }
-  .era__timeline:empty::after {
-    content: "Tidak ada peristiwa yang cocok dengan filter.";
+  .era__empty {
     color: var(--muted);
     font-style: italic;
+    margin: 0.5rem 0 0 1.5rem;
   }
+  .era__empty[hidden] { display: none; }
 </style>

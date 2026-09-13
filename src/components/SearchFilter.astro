@@ -49,6 +49,7 @@ const themes: Array<{ id: string; label: string }> = [
   </fieldset>
 
   <p class="filter__count" id="result-count" aria-live="polite"></p>
+  <button type="button" id="clear-filters" class="filter__clear">Bersihkan filter</button>
 </div>
 
 <style>
@@ -73,6 +74,18 @@ const themes: Array<{ id: string; label: string }> = [
   .filter__chip input { display: none; }
   .filter__chip:has(input:checked) { background: var(--secondary); color: #fff; border-color: var(--secondary); }
   .filter__count { color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0; }
+  .filter__clear {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    background: var(--card);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+  }
+  .filter__clear:hover { border-color: var(--primary); }
 </style>
 
 <script>
@@ -82,6 +95,7 @@ const themes: Array<{ id: string; label: string }> = [
   const input = document.getElementById("search-input") as HTMLInputElement;
   const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-event]"));
   const count = document.getElementById("result-count")!;
+  const clearBtn = document.getElementById("clear-filters")!;
 
   function readFilters() {
     const eras = Array.from(
@@ -110,14 +124,27 @@ const themes: Array<{ id: string; label: string }> = [
     for (const section of document.querySelectorAll<HTMLElement>("[data-era-section]")) {
       const anyVisible = section.querySelectorAll("[data-event]:not([hidden])").length > 0;
       section.style.opacity = anyVisible ? "1" : "0.35";
+      const empty = section.querySelector<HTMLElement>("[data-era-empty]");
+      if (empty) empty.hidden = anyVisible;
     }
 
     count.textContent = `${visible} dari ${cards.length} peristiwa`;
   }
 
-  input.addEventListener("input", apply);
+  let debounceTimer: number | undefined;
+  input.addEventListener("input", () => {
+    window.clearTimeout(debounceTimer);
+    debounceTimer = window.setTimeout(apply, 150);
+  });
   document.querySelectorAll<HTMLInputElement>("[data-era-filter], [data-theme-filter]").forEach((el) => {
     el.addEventListener("change", apply);
+  });
+  clearBtn.addEventListener("click", () => {
+    input.value = "";
+    document.querySelectorAll<HTMLInputElement>("[data-era-filter], [data-theme-filter]").forEach((el) => {
+      el.checked = false;
+    });
+    apply();
   });
   apply();
 </script>

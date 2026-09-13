@@ -1,3 +1,5 @@
+import { ERA_IDS } from "./eras";
+
 export const POINTS_PER_READ = 10;
 
 export interface LevelTier {
@@ -109,7 +111,7 @@ export function computeBadges(state: PlayerState, events: EventMeta[]): Badge[] 
     earned.push(BADGES.find((b) => b.id === "first-read")!);
   }
 
-  const eras = ["jahiliyyah", "mecca", "medina", "post-fath"];
+  const eras = ERA_IDS;
   for (const era of eras) {
     const eraIds = events.filter((e) => e.era === era).map((e) => e.id);
     if (eraIds.length > 0 && eraIds.every((id) => read.has(id))) {

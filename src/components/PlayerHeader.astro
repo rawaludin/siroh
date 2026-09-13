@@ -1,7 +1,10 @@
 ---
-// PlayerHeader.astro — sticky gamification bar
+interface Props {
+  total?: number;
+}
+const { total = 0 } = Astro.props;
 ---
-<header class="player" id="player-header">
+<header class="player" id="player-header" data-total={total}>
   <div class="player__level"><span id="level-icon">🐪</span> <strong id="level-name">Musafir Kecil</strong></div>
   <div class="player__stats">
     <span id="points">0 poin</span>
@@ -31,7 +34,7 @@
 <script>
   import { computeLevel, computeProgress, initialState } from "../lib/gamification";
 
-  const TOTAL = 34;
+  const TOTAL = Number(document.getElementById("player-header")?.dataset.total ?? 0);
   const KEY = "siroh-player";
   const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
 

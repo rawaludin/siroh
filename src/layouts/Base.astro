@@ -12,9 +12,10 @@ import { pwaInfo } from "virtual:pwa-info";
 interface Props {
   title: string;
   description?: string;
+  total?: number;
 }
 
-const { title, description } = Astro.props;
+const { title, description, total } = Astro.props;
 
 const WA_NUMBER = "628112071744";
 const WA_MESSAGE = [
@@ -35,13 +36,14 @@ const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ff6b35" />
-    <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.png" />
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <noscript><style>[data-reveal]{opacity:1;transform:none}</style></noscript>
   </head>
   <body>
-    <PlayerHeader />
+    <PlayerHeader total={total} />
     <slot />
     <footer class="site-footer">
       <a
@@ -71,6 +73,11 @@ const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)
     <script>
       let current: HTMLAudioElement | null = null;
       let currentBtn: HTMLButtonElement | null = null;
+      const setPlaying = (btn: HTMLButtonElement | null, playing: boolean) => {
+        if (!btn) return;
+        btn.classList.toggle("is-playing", playing);
+        btn.setAttribute("aria-pressed", playing ? "true" : "false");
+      };
       document.addEventListener("click", (e) => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-play-audio]");
         if (!btn) return;
@@ -78,22 +85,22 @@ const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)
         if (current && currentBtn === btn) {
           current.pause();
           current = null;
-          currentBtn?.classList.remove("is-playing");
+          setPlaying(currentBtn, false);
           currentBtn = null;
           return;
         }
         current?.pause();
-        currentBtn?.classList.remove("is-playing");
+        setPlaying(currentBtn, false);
         const urls: string[] = JSON.parse(btn.dataset.playAudio ?? "[]");
         if (urls.length === 0) return;
         const play = (i: number) => {
-          if (i >= urls.length) { currentBtn?.classList.remove("is-playing"); current = null; currentBtn = null; return; }
+          if (i >= urls.length) { setPlaying(currentBtn, false); current = null; currentBtn = null; return; }
           current = new Audio(urls[i]);
           current.onended = () => play(i + 1);
           current.play();
         };
         currentBtn = btn;
-        btn.classList.add("is-playing");
+        setPlaying(btn, true);
         play(0);
       });
     </script>

@@ -31,6 +31,10 @@ body {
 
 h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; }
 
+[lang="ar"], .arabic, .verse__arabic, .hadith__arabic, .dialogue__arabic {
+  font-family: "Amiri", serif;
+}
+
 a { color: var(--primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 

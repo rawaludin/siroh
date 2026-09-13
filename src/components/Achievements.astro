@@ -1,0 +1,81 @@
+---
+import { BADGES, type EventMeta } from "../lib/gamification";
+
+interface Props {
+  events: EventMeta[];
+}
+
+const { events } = Astro.props;
+---
+
+<section class="achievements" id="achievements" data-events={JSON.stringify(events)}>
+  <h2 class="achievements__title">Lencana / Pencapaian</h2>
+  <ul class="achievements__list">
+    {BADGES.map((b) => (
+      <li class="achievement is-locked" data-badge-id={b.id}>
+        <span class="achievement__icon" aria-hidden="true">{b.icon}</span>
+        <div class="achievement__body">
+          <strong class="achievement__name">{b.name}</strong>
+          <span class="achievement__desc">{b.desc}</span>
+        </div>
+        <span class="achievement__lock" aria-hidden="true">🔒</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .achievements { margin: 3rem 0 1rem; }
+  .achievements__title { font-size: 1.25rem; margin: 0 0 1rem; }
+  .achievements__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  @media (min-width: 720px) {
+    .achievements__list { grid-template-columns: 1fr 1fr; }
+  }
+  .achievement {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .achievement__icon { font-size: 1.6rem; line-height: 1; }
+  .achievement__body { display: flex; flex-direction: column; }
+  .achievement__name { font-family: var(--font-display); }
+  .achievement__desc { font-size: 0.8rem; color: var(--muted); }
+  .achievement__lock { margin-left: auto; font-size: 1.25rem; }
+  .achievement.is-locked { filter: grayscale(1); opacity: 0.55; }
+  .achievement.is-earned { border-color: var(--accent); }
+  .achievement.is-earned .achievement__lock { display: none; }
+</style>
+
+<script>
+  import { computeBadges, initialState } from "../lib/gamification";
+
+  const root = document.querySelector<HTMLElement>(".achievements");
+  if (root) {
+    const events = JSON.parse(root.dataset.events ?? "[]");
+    const KEY = "siroh-player";
+    const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
+
+    const render = () => {
+      const earnedIds = new Set(computeBadges(load(), events).map((b) => b.id));
+      root.querySelectorAll<HTMLElement>("[data-badge-id]").forEach((el) => {
+        const earned = earnedIds.has(el.dataset.badgeId!);
+        el.classList.toggle("is-earned", earned);
+        el.classList.toggle("is-locked", !earned);
+      });
+    };
+
+    render();
+    window.addEventListener("siroh:updated", render);
+  }
+</script>
