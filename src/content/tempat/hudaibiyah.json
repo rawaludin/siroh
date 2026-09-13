@@ -1,0 +1,10 @@
+{
+  "name": "Hudaibiyah",
+  "nameAr": "الحديبية",
+  "description": "Tempat dekat Makkah tempat ditandatanganinya Perjanjian Hudaibiyah. Perjanjian ini membuka jalan bagi perdamaian dan dakwah.",
+  "location": "Dekat Makkah, Arab Saudi",
+  "order": 14,
+  "relatedEvents": [
+    "perjanjian-hudaibiyah"
+  ]
+}

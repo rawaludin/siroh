@@ -1,0 +1,11 @@
+{
+  "name": "Masjid Nabawi",
+  "nameAr": "المسجد النبوي",
+  "description": "Masjid yang dibangun Nabi ﷺ di Madinah dan menjadi pusat kegiatan umat Islam. Di dalamnya terdapat makam beliau yang mulia.",
+  "location": "Madinah, Arab Saudi",
+  "order": 6,
+  "relatedEvents": [
+    "masjid-nabawi-dan-persaudaraan",
+    "wafatnya-nabi"
+  ]
+}

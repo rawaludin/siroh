@@ -1,0 +1,21 @@
+{
+  "name": "Makkah",
+  "nameAr": "مكة",
+  "description": "Kota suci tempat Nabi Muhammad ﷺ dilahirkan dan dibesarkan. Di sinilah berdiri Ka'bah, rumah ibadah pertama untuk menyembah Allah.",
+  "location": "Arab Saudi",
+  "order": 1,
+  "relatedEvents": [
+    "kelahiran-nabi",
+    "yatim-di-pengasuhan",
+    "perang-fijar-hilf-al-fudul",
+    "pernikahan-khadijah",
+    "dakwah-sembunyi",
+    "penindasan-quraisy",
+    "islamnya-hamzah-dan-umar",
+    "pemboikotan-bani-hasyim",
+    "tahun-kesedihan",
+    "isra-miraj",
+    "umrah-qadha",
+    "fathu-makkah"
+  ]
+}

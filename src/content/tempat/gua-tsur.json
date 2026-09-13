@@ -1,0 +1,10 @@
+{
+  "name": "Gua Tsur",
+  "nameAr": "غار ثور",
+  "description": "Gua di Jabal Tsur tempat Nabi ﷺ dan Abu Bakar bersembunyi selama tiga hari saat hijrah. Allah melindungi mereka dari kejaran kaum Quraisy.",
+  "location": "Jabal Tsur, Makkah, Arab Saudi",
+  "order": 5,
+  "relatedEvents": [
+    "hijrah-ke-madinah"
+  ]
+}

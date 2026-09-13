@@ -1,0 +1,10 @@
+{
+  "name": "Gua Hira",
+  "nameAr": "غار حراء",
+  "description": "Gua kecil di Jabal Nur tempat Nabi ﷺ menyendiri merenungi kebesaran Allah. Di sinilah Malaikat Jibril menyampaikan wahyu pertama.",
+  "location": "Jabal Nur, Makkah, Arab Saudi",
+  "order": 4,
+  "relatedEvents": [
+    "wahyu-pertama"
+  ]
+}

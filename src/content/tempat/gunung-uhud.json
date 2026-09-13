@@ -1,0 +1,10 @@
+{
+  "name": "Gunung Uhud",
+  "nameAr": "جبل أحد",
+  "description": "Gunung di utara Madinah tempat terjadinya Perang Uhud. Nabi ﷺ mengajarkan agar pasukan taat pada perintah pemimpin.",
+  "location": "Madinah, Arab Saudi",
+  "order": 11,
+  "relatedEvents": [
+    "perang-uhud"
+  ]
+}

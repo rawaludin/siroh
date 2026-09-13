@@ -1,0 +1,10 @@
+{
+  "name": "Habasyah",
+  "nameAr": "الحبشة",
+  "description": "Negeri yang kini bernama Ethiopia, tempat kaum muslimin berhijrah pertama kali. Rajanya yang adil melindungi mereka.",
+  "location": "Ethiopia (dahulu Habasyah)",
+  "order": 19,
+  "relatedEvents": [
+    "hijrah-ke-habasyah"
+  ]
+}

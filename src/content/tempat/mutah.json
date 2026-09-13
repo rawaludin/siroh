@@ -1,0 +1,10 @@
+{
+  "name": "Mu'tah",
+  "nameAr": "مؤتة",
+  "description": "Daerah di Syam tempat terjadinya Perang Mu'tah. Perang pertama kaum muslimin melawan pasukan Romawi.",
+  "location": "Yordania",
+  "order": 18,
+  "relatedEvents": [
+    "perang-mutah"
+  ]
+}

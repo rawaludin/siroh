@@ -1,0 +1,10 @@
+{
+  "name": "Thaif",
+  "nameAr": "الطائف",
+  "description": "Kota di pegunungan yang sejuk, tempat Nabi ﷺ berdakwah namun dilempari batu. Beliau tetap mendoakan kebaikan untuk penduduknya.",
+  "location": "Arab Saudi",
+  "order": 16,
+  "relatedEvents": [
+    "perang-hunain-dan-thaif"
+  ]
+}

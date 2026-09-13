@@ -1,0 +1,10 @@
+{
+  "name": "Badar",
+  "nameAr": "بدر",
+  "description": "Lokasi dekat sumur Badar tempat terjadinya Perang Badar. Perang pertama yang dimenangkan kaum muslimin dengan pertolongan Allah.",
+  "location": "Arab Saudi",
+  "order": 12,
+  "relatedEvents": [
+    "perang-badar"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Khaibar",
+  "nameAr": "خيبر",
+  "description": "Daerah dengan benteng-benteng kuat yang ditaklukkan kaum muslimin. Di sinilah terjadinya Perang Khaibar.",
+  "location": "Arab Saudi",
+  "order": 15,
+  "relatedEvents": [
+    "perang-khaibar"
+  ]
+}

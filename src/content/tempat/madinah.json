@@ -1,0 +1,16 @@
+{
+  "name": "Madinah",
+  "nameAr": "المدينة المنورة",
+  "description": "Kota yang dahulu bernama Yatsrib, tempat Nabi ﷺ berhijrah dan membangun masyarakat Islam. Di sini pula beliau wafat dan dimakamkan.",
+  "location": "Arab Saudi",
+  "order": 2,
+  "relatedEvents": [
+    "hijrah-ke-madinah",
+    "masjid-nabawi-dan-persaudaraan",
+    "piagam-madinah",
+    "perang-khandaq",
+    "surat-kepada-para-raja",
+    "tahun-delegasi",
+    "wafatnya-nabi"
+  ]
+}

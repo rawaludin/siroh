@@ -1,0 +1,14 @@
+{
+  "name": "Ka'bah",
+  "nameAr": "الكعبة",
+  "description": "Rumah suci berbentuk kubus yang dibangun untuk beribadah kepada Allah semata. Umat Islam di seluruh dunia menghadap ke arahnya setiap kali salat.",
+  "location": "Masjidil Haram, Makkah, Arab Saudi",
+  "order": 3,
+  "relatedEvents": [
+    "peletakan-hajar-aswad",
+    "isra-miraj",
+    "umrah-qadha",
+    "fathu-makkah",
+    "haji-wada"
+  ]
+}

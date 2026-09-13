@@ -1,0 +1,10 @@
+{
+  "name": "Bukit Shafa",
+  "nameAr": "الصفا",
+  "description": "Bukit kecil dekat Ka'bah tempat Nabi ﷺ menyeru kaum Quraisy untuk beriman. Dari sinilah beliau menyampaikan dakwah secara terang-terangan.",
+  "location": "Makkah, Arab Saudi",
+  "order": 8,
+  "relatedEvents": [
+    "dakwah-terang-terangan"
+  ]
+}

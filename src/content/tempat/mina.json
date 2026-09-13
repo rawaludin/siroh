@@ -1,0 +1,12 @@
+{
+  "name": "Mina",
+  "nameAr": "منى",
+  "description": "Lembah dekat Makkah tempat jamaah haji melontar jumrah. Di sinilah pula Nabi ﷺ menerima Baiat Aqabah dari penduduk Yatsrib.",
+  "location": "Makkah, Arab Saudi",
+  "order": 10,
+  "relatedEvents": [
+    "baiat-aqabah-pertama",
+    "baiat-aqabah-kedua",
+    "haji-wada"
+  ]
+}

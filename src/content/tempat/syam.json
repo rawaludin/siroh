@@ -1,0 +1,12 @@
+{
+  "name": "Syam",
+  "nameAr": "الشام",
+  "description": "Wilayah di utara Jazirah Arab yang kini mencakup Suriah dan sekitarnya. Nabi ﷺ pernah berdagang ke sini bersama pamannya.",
+  "location": "Suriah, Yordania, Lebanon, dan Palestina (wilayah Syam)",
+  "order": 20,
+  "relatedEvents": [
+    "perjalanan-ke-syam",
+    "perang-mutah",
+    "perang-tabuk"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Tabuk",
+  "nameAr": "تبوك",
+  "description": "Daerah di utara yang jauh, tujuan ekspedisi kaum muslimin. Di sinilah terjadinya Perang Tabuk.",
+  "location": "Arab Saudi",
+  "order": 17,
+  "relatedEvents": [
+    "perang-tabuk"
+  ]
+}

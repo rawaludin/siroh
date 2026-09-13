@@ -1,0 +1,10 @@
+{
+  "name": "Masjid Quba",
+  "nameAr": "مسجد قباء",
+  "description": "Masjid pertama yang dibangun dalam Islam, terletak di luar Madinah. Nabi ﷺ membangunnya bersama para sahabat saat tiba dari hijrah.",
+  "location": "Madinah, Arab Saudi",
+  "order": 7,
+  "relatedEvents": [
+    "hijrah-ke-madinah"
+  ]
+}

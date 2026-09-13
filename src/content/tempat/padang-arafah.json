@@ -1,0 +1,10 @@
+{
+  "name": "Padang Arafah",
+  "nameAr": "عرفة",
+  "description": "Padang luas tempat jutaan jamaah haji berkumpul pada puncak ibadah haji. Di sinilah Nabi ﷺ menyampaikan khutbah perpisahannya.",
+  "location": "Makkah, Arab Saudi",
+  "order": 9,
+  "relatedEvents": [
+    "haji-wada"
+  ]
+}

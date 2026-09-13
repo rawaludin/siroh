@@ -1,0 +1,10 @@
+{
+  "name": "Khandaq",
+  "nameAr": "الخندق",
+  "description": "Parit besar yang digali kaum muslimin mengelilingi Madinah atas usul Salman Al-Farisi. Parit ini melindungi kota dari serangan musuh.",
+  "location": "Madinah, Arab Saudi",
+  "order": 13,
+  "relatedEvents": [
+    "perang-khandaq"
+  ]
+}
