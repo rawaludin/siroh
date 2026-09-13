@@ -19,6 +19,7 @@ const { id, year, title, titleAr, summary, themes, era, searchText } = Astro.pro
 <article
   class="event-card bouncy"
   data-event
+  data-event-id={id}
   data-reveal
   data-era={era}
   data-themes={JSON.stringify(themes)}
@@ -40,6 +41,23 @@ const { id, year, title, titleAr, summary, themes, era, searchText } = Astro.pro
     border-radius: var(--radius);
     padding: 1rem 1.25rem;
     transition: box-shadow 0.15s ease;
+    position: relative;
+  }
+  .event-card.data-read::after {
+    content: "✓";
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--success);
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.9rem;
   }
   .event-card:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -60,3 +78,22 @@ const { id, year, title, titleAr, summary, themes, era, searchText } = Astro.pro
   .event-card__summary { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; }
   .event-card[hidden] { display: none; }
 </style>
+
+<script>
+  import { initialState } from "../lib/gamification";
+
+  const KEY = "siroh-player";
+  const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
+
+  function render() {
+    const s = load();
+    document.querySelectorAll<HTMLElement>("[data-event-id]").forEach((card) => {
+      const id = card.dataset.eventId;
+      if (id && s.readIds.includes(id)) card.classList.add("data-read");
+      else card.classList.remove("data-read");
+    });
+  }
+
+  render();
+  window.addEventListener("siroh:updated", render);
+</script>
