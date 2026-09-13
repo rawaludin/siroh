@@ -1,0 +1,9 @@
+{
+  "term": "Khutbah",
+  "termAr": "خطبة",
+  "definition": "Ceramah keagamaan yang disampaikan sebelum shalat Jumat dan hari raya. Nabi Muhammad ﷺ menyampaikan khutbah terakhirnya saat haji wada.",
+  "order": 23,
+  "relatedEvents": [
+    "haji-wada"
+  ]
+}

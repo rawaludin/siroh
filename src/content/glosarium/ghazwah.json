@@ -1,0 +1,12 @@
+{
+  "term": "Ghazwah",
+  "termAr": "غزوة",
+  "definition": "Peperangan yang dipimpin langsung oleh Nabi Muhammad ﷺ. Contoh ghazwah adalah Perang Badar dan Perang Uhud.",
+  "order": 42,
+  "relatedEvents": [
+    "perang-badar",
+    "perang-uhud",
+    "perang-khandaq",
+    "perang-khaibar"
+  ]
+}
