@@ -1,0 +1,46 @@
+---
+import Base from "../../layouts/Base.astro";
+import Arabic from "../../components/Arabic.astro";
+import { getCollection } from "astro:content";
+
+const tempat = (await getCollection("tempat")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Tempat — Sirah Nabawiyah" description="Tempat-tempat bersejarah dalam Sirah Nabawiyah." total={tempat.length}>
+  <main class="page">
+    <a href="/" class="page__back">← Kembali ke garis waktu</a>
+    <h1 class="page__title">Tempat</h1>
+    <p class="page__subtitle">Tempat-tempat bersejarah dalam perjalanan hidup Nabi Muhammad ﷺ.</p>
+
+    <div class="grid">
+      {tempat.map((t) => (
+        <a href={`/tempat/${t.id}/`} class="card bouncy" data-reveal>
+          <h3 class="card__name">{t.data.name}</h3>
+          <span class="card__name-ar"><Arabic text={t.data.nameAr} /></span>
+          <p class="card__desc">{t.data.description}</p>
+        </a>
+      ))}
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page { max-width: 900px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .page__back { font-size: 0.9rem; }
+  .page__title { margin: 1rem 0 0; }
+  .page__subtitle { margin: 0 0 1.25rem; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover { text-decoration: none; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); }
+  .card__name { margin: 0; font-size: 1.05rem; }
+  .card__name-ar { color: var(--muted); font-size: 1.2rem; margin: 0.1rem 0 0.4rem; }
+  .card__desc { margin: 0; color: var(--muted); font-size: 0.9rem; }
+</style>

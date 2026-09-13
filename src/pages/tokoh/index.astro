@@ -1,0 +1,56 @@
+---
+import Base from "../../layouts/Base.astro";
+import Arabic from "../../components/Arabic.astro";
+import { getCollection } from "astro:content";
+
+const tokoh = (await getCollection("tokoh")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Tokoh Sirah — Sirah Nabawiyah" description="Tokoh-tokoh penting dalam perjalanan hidup Nabi Muhammad ﷺ." total={tokoh.length}>
+  <main class="page">
+    <a href="/" class="page__back">← Kembali ke garis waktu</a>
+    <h1 class="page__title">Tokoh Sirah</h1>
+    <p class="page__subtitle">Kenali para sahabat dan tokoh penting dalam Sirah Nabawiyah.</p>
+
+    <div class="grid">
+      {tokoh.map((t) => (
+        <a href={`/tokoh/${t.slug}/`} class="card bouncy" data-reveal>
+          <h3 class="card__name">{t.data.name}</h3>
+          <span class="card__name-ar"><Arabic text={t.data.nameAr} /></span>
+          <span class="card__role">{t.data.role}</span>
+        </a>
+      ))}
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page { max-width: 900px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .page__back { font-size: 0.9rem; }
+  .page__title { margin: 1rem 0 0; }
+  .page__subtitle { margin: 0 0 1.25rem; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover { text-decoration: none; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); }
+  .card__name { margin: 0; font-size: 1.05rem; }
+  .card__name-ar { color: var(--muted); font-size: 1.2rem; margin: 0.1rem 0 0.4rem; }
+  .card__role {
+    margin-top: auto;
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.75rem;
+    font-family: var(--font-display);
+    background: var(--purple);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+  }
+</style>

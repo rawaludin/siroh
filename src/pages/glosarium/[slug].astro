@@ -1,0 +1,53 @@
+---
+import Base from "../../layouts/Base.astro";
+import Arabic from "../../components/Arabic.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const glosarium = await getCollection("glosarium");
+  return glosarium.map((g) => ({ params: { slug: g.id }, props: { entry: g } }));
+}
+
+const { entry } = Astro.props;
+
+const events = await getCollection("events");
+const titleBySlug = new Map(events.map((e) => [e.slug, e.data.title]));
+const relatedEvents = (entry.data.relatedEvents ?? []).map((slug) => ({ slug, title: titleBySlug.get(slug) ?? slug }));
+---
+
+<Base title={`${entry.data.term} — Glosarium Sirah Nabawiyah`} description={entry.data.definition}>
+  <main class="detail">
+    <a href="/glosarium/" class="detail__back">← Kembali ke glosarium</a>
+    <article class="detail__article">
+      <header class="detail__header">
+        <h1 class="detail__title">{entry.data.term}</h1>
+        <span class="detail__term-ar"><Arabic text={entry.data.termAr} /></span>
+      </header>
+
+      <p class="detail__def">{entry.data.definition}</p>
+    </article>
+
+    {relatedEvents.length > 0 && (
+      <nav class="related">
+        <h2>Peristiwa terkait</h2>
+        <ul>
+          {relatedEvents.map((r) => (
+            <li><a href={`/events/${r.slug}/`}>{r.title}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+  </main>
+</Base>
+
+<style>
+  .detail { max-width: 760px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .detail__back { font-size: 0.9rem; }
+  .detail__header { border-left: 4px solid var(--accent); padding-left: 1rem; margin: 1.25rem 0; }
+  .detail__title { margin: 0.3rem 0; }
+  .detail__term-ar { display: block; color: var(--muted); font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .detail__def { font-size: 1.05rem; margin-top: 1.25rem; }
+  .related { margin-top: 2rem; }
+  .related h2 { font-size: 1.1rem; }
+  .related ul { padding-left: 1.2rem; color: var(--muted); }
+</style>

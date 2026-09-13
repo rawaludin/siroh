@@ -21,6 +21,41 @@ const themeIds = [
   "masa-muda",
 ] as const;
 
+const tokoh = defineCollection({
+  type: "content",
+  schema: z.object({
+    name: z.string(),
+    nameAr: z.string(),
+    role: z.string(),
+    order: z.number(),
+    themes: z.array(z.enum(themeIds)).optional(),
+    relatedEvents: z.array(z.string()).optional(),
+  }),
+});
+
+const tempat = defineCollection({
+  type: "data",
+  schema: z.object({
+    name: z.string(),
+    nameAr: z.string(),
+    description: z.string(),
+    location: z.string().optional(),
+    order: z.number(),
+    relatedEvents: z.array(z.string()).optional(),
+  }),
+});
+
+const glosarium = defineCollection({
+  type: "data",
+  schema: z.object({
+    term: z.string(),
+    termAr: z.string(),
+    definition: z.string(),
+    order: z.number(),
+    relatedEvents: z.array(z.string()).optional(),
+  }),
+});
+
 export const collections = {
   events: defineCollection({
     type: "content",
@@ -47,4 +82,7 @@ export const collections = {
       lessons: z.array(z.string()).min(1),
     }),
   }),
+  tokoh,
+  tempat,
+  glosarium,
 };

@@ -1,0 +1,66 @@
+---
+import Base from "../../layouts/Base.astro";
+import Arabic from "../../components/Arabic.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const tokoh = await getCollection("tokoh");
+  return tokoh.map((t) => ({ params: { slug: t.slug }, props: { entry: t } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const events = await getCollection("events");
+const titleBySlug = new Map(events.map((e) => [e.slug, e.data.title]));
+const relatedEvents = (entry.data.relatedEvents ?? []).map((slug) => ({ slug, title: titleBySlug.get(slug) ?? slug }));
+---
+
+<Base title={`${entry.data.name} — Tokoh Sirah Nabawiyah`} description={entry.data.role}>
+  <main class="detail">
+    <a href="/tokoh/" class="detail__back">← Kembali ke daftar tokoh</a>
+    <article class="detail__article">
+      <header class="detail__header">
+        <h1 class="detail__title">{entry.data.name}</h1>
+        <span class="detail__name-ar"><Arabic text={entry.data.nameAr} /></span>
+        <span class="detail__role">{entry.data.role}</span>
+      </header>
+
+      <div class="detail__body">
+        <Content />
+      </div>
+    </article>
+
+    {relatedEvents.length > 0 && (
+      <nav class="related">
+        <h2>Peristiwa terkait</h2>
+        <ul>
+          {relatedEvents.map((r) => (
+            <li><a href={`/events/${r.slug}/`}>{r.title}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+  </main>
+</Base>
+
+<style>
+  .detail { max-width: 760px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .detail__back { font-size: 0.9rem; }
+  .detail__header { border-left: 4px solid var(--primary); padding-left: 1rem; margin: 1.25rem 0; }
+  .detail__title { margin: 0.3rem 0; }
+  .detail__name-ar { display: block; color: var(--muted); font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .detail__role {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-family: var(--font-display);
+    background: var(--purple);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+  }
+  .detail__body { font-size: 1.05rem; margin-top: 1.25rem; }
+  .related { margin-top: 2rem; }
+  .related h2 { font-size: 1.1rem; }
+  .related ul { padding-left: 1.2rem; color: var(--muted); }
+</style>
