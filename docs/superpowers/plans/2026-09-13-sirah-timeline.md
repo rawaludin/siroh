@@ -2242,8 +2242,9 @@ Each event MDX file is REWRITTEN to include:
 1. **Detailed narrative** in Indonesian (3–6 substantial paragraphs, not a
    summary) that tells the story fully, including **dialogues/conversations**
    written as quoted speech (e.g. “Iqra'!” — “Aku tidak bisa membaca.”).
-2. **Quranic verses** where relevant, using the `<Verse>` component:
-   `<Verse arabic="…" translation="…" source="QS. Asy-Syu'ara: 214" />`.
+2. **Quranic verses** where relevant, using the `<Verse>` component, always
+   with `surah`/`ayah` (and `ayahEnd` for ranges) so the audio plays:
+   `<Verse arabic="…" translation="…" source="QS. Asy-Syu'ara: 214" surah={26} ayah={214} />`.
 3. **Hadith** where relevant, using the `<Hadith>` component:
    `<Hadith arabic="…" translation="…" source="HR. Al-Bukhari no. 3" link="https://sunnah.com/bukhari:3" />`.
 4. **`lessons`** in frontmatter: 3–5 strings, each a self-contained
@@ -2293,7 +2294,7 @@ import Hadith from "../../components/Hadith.astro";
 
 <narrative paragraphs…>
 
-<Verse arabic="…" translation="…" source="QS. …" />
+<Verse arabic="…" translation="…" source="QS. …" surah={…} ayah={…} />
 
 <Hadith arabic="…" translation="…" source="HR. …" link="…" />
 ```
@@ -2302,13 +2303,23 @@ import Hadith from "../../components/Hadith.astro";
 
 **Files:**
 - Modify: `src/content/config.ts` (add `lessons`)
+- Create: `src/lib/audio.ts`
+- Test: `src/lib/audio.test.ts`
 - Create: `src/components/Verse.astro`
 - Create: `src/components/Hadith.astro`
+- Modify: `src/layouts/Base.astro` (global audio player script)
 - Modify: `src/pages/events/[slug].astro` (render lessons section)
 
 **Interfaces:**
-- Produces: `Verse` and `Hadith` MDX components; `lessons` schema field.
+- Produces: `Verse` and `Hadith` MDX components; `lessons` schema field;
+  `ayahsAudioUrls(surah, ayah, ayahEnd?, reciter?)` in `src/lib/audio.ts`.
   Consumed by content tasks 13–15 and the detail page.
+
+**Audio source:** Quranic verse audio is served from the public, free
+`everyayah.com` per-ayah MP3 files. URL pattern:
+`https://everyayah.com/data/{reciter}/{surah:03d}{ayah:03d}.mp3` (e.g.
+`https://everyayah.com/data/Alafasy_128kbps/001001.mp3`). Default reciter
+`Alafasy_128kbps` (Mishary Rashid Alafasy).
 
 - [ ] **Step 1: Add `lessons` to the schema (temporarily optional)**
 
@@ -2319,21 +2330,82 @@ In `src/content/config.ts`, add after the `related` line:
 (Optional here so the existing 34 files still validate; Task 16 flips it to
 `.min(1)` to enforce completeness once all content is enriched.)
 
-- [ ] **Step 2: Write `src/components/Verse.astro`**
+- [ ] **Step 2: Write `src/lib/audio.ts` + test (TDD)**
+
+Test first (`src/lib/audio.test.ts`):
+```ts
+import { describe, it, expect } from "vitest";
+import { ayahsAudioUrls } from "./audio";
+
+describe("ayahsAudioUrls", () => {
+  it("builds a single-ayah URL with zero padding", () => {
+    expect(ayahsAudioUrls(1, 1)).toEqual(["https://everyayah.com/data/Alafasy_128kbps/001001.mp3"]);
+  });
+  it("builds a range of ayah URLs", () => {
+    expect(ayahsAudioUrls(96, 1, 5)).toEqual([
+      "https://everyayah.com/data/Alafasy_128kbps/096001.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096002.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096003.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096004.mp3",
+      "https://everyayah.com/data/Alafasy_128kbps/096005.mp3",
+    ]);
+  });
+  it("honors a custom reciter", () => {
+    expect(ayahsAudioUrls(1, 1, 1, "Husary_128kbps")[0]).toContain("Husary_128kbps");
+  });
+});
+```
+
+Implementation (`src/lib/audio.ts`):
+```ts
+export const DEFAULT_RECITER = "Alafasy_128kbps";
+
+const pad = (n: number) => String(n).padStart(3, "0");
+
+export function ayahsAudioUrls(
+  surah: number,
+  ayah: number,
+  ayahEnd?: number,
+  reciter: string = DEFAULT_RECITER,
+): string[] {
+  const end = ayahEnd ?? ayah;
+  const urls: string[] = [];
+  for (let a = ayah; a <= end; a++) {
+    urls.push(`https://everyayah.com/data/${reciter}/${pad(surah)}${pad(a)}.mp3`);
+  }
+  return urls;
+}
+```
+
+Run `npx vitest run src/lib/audio.test.ts` (expect fail then pass).
+
+- [ ] **Step 3: Write `src/components/Verse.astro` (with audio)**
 
 ```astro
 ---
+import { ayahsAudioUrls } from "../lib/audio";
+
 interface Props {
   arabic: string;
   translation: string;
   source: string;
+  surah?: number;
+  ayah?: number;
+  ayahEnd?: number;
 }
-const { arabic, translation, source } = Astro.props;
+const { arabic, translation, source, surah, ayah, ayahEnd } = Astro.props;
+const hasAudio = typeof surah === "number" && typeof ayah === "number";
+const urls = hasAudio ? ayahsAudioUrls(surah!, ayah!, ayahEnd) : [];
 ---
 <figure class="verse">
   <blockquote lang="ar" dir="rtl" class="verse__arabic">{arabic}</blockquote>
   <figcaption class="verse__translation">“{translation}”</figcaption>
   <cite class="verse__source">{source}</cite>
+  {hasAudio && (
+    <button class="verse__play" type="button" data-play-audio={JSON.stringify(urls)} aria-label="Dengarkan ayat">
+      ▶️ Dengarkan
+    </button>
+  )}
 </figure>
 
 <style>
@@ -2347,10 +2419,22 @@ const { arabic, translation, source } = Astro.props;
   .verse__arabic { margin: 0; font-size: 1.5rem; line-height: 1.9; color: #3a3328; }
   .verse__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
   .verse__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+  .verse__play {
+    margin-top: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+  }
+  .verse__play.is-playing { background: var(--secondary); }
 </style>
 ```
 
-- [ ] **Step 3: Write `src/components/Hadith.astro`**
+- [ ] **Step 4: Write `src/components/Hadith.astro`**
 
 ```astro
 ---
@@ -2384,7 +2468,42 @@ const { arabic, translation, source, link } = Astro.props;
 </style>
 ```
 
-- [ ] **Step 4: Render lessons on the detail page**
+- [ ] **Step 5: Add the global audio player script to `src/layouts/Base.astro`**
+
+Add before `</body>` (alongside the reveal script):
+```astro
+<script>
+  let current: HTMLAudioElement | null = null;
+  let currentBtn: HTMLButtonElement | null = null;
+  document.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-play-audio]");
+    if (!btn) return;
+    e.preventDefault();
+    if (current && currentBtn === btn) {
+      current.pause();
+      current = null;
+      currentBtn?.classList.remove("is-playing");
+      currentBtn = null;
+      return;
+    }
+    current?.pause();
+    currentBtn?.classList.remove("is-playing");
+    const urls: string[] = JSON.parse(btn.dataset.playAudio ?? "[]");
+    if (urls.length === 0) return;
+    const play = (i: number) => {
+      if (i >= urls.length) { currentBtn?.classList.remove("is-playing"); current = null; currentBtn = null; return; }
+      current = new Audio(urls[i]);
+      current.onended = () => play(i + 1);
+      current.play();
+    };
+    currentBtn = btn;
+    btn.classList.add("is-playing");
+    play(0);
+  });
+</script>
+```
+
+- [ ] **Step 6: Render lessons on the detail page**
 
 In `src/pages/events/[slug].astro`, insert after the `<div class="detail__body">…</div>` block and before `<SourceList … />`:
 
@@ -2407,16 +2526,16 @@ And add scoped style:
   .lessons li { margin-bottom: 0.5rem; }
 ```
 
-- [ ] **Step 5: Verify build**
+- [ ] **Step 7: Verify build**
 
 Run: `npx astro build`
 Expected: exit 0 (existing 34 files still validate with optional `lessons`).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add src/content/config.ts src/components/Verse.astro src/components/Hadith.astro src/pages/events/[slug].astro
-git commit -m "feat: add lessons field and verse/hadith components"
+git add src/content/config.ts src/lib/audio.ts src/lib/audio.test.ts src/components/Verse.astro src/components/Hadith.astro src/layouts/Base.astro src/pages/events/[slug].astro
+git commit -m "feat: add lessons field, verse/hadith components, and verse audio"
 ```
 
 ## Task 13: Enrich Jahiliyyah & Mecca events
