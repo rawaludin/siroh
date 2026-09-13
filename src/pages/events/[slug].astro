@@ -9,14 +9,14 @@ import { getEra } from "../../lib/eras";
 
 export async function getStaticPaths() {
   const events = await getCollection("events");
-  return events.map((e) => ({ params: { slug: e.id }, props: { entry: e } }));
+  return events.map((e) => ({ params: { slug: e.slug }, props: { entry: e } }));
 }
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
 const all = sortChronological((await getCollection("events")).map(toEventData));
-const index = all.findIndex((e) => e.id === entry.id);
+const index = all.findIndex((e) => e.id === entry.slug);
 const prev = index > 0 ? all[index - 1] : undefined;
 const next = index < all.length - 1 ? all[index + 1] : undefined;
 const era = getEra(entry.data.era);

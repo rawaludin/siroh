@@ -39,7 +39,7 @@ type EventEntry = CollectionEntry<"events">;
 
 export function toEventData(entry: EventEntry): EventData {
   return {
-    id: entry.id,
+    id: entry.slug,
     order: entry.data.order,
     year: entry.data.year,
     era: entry.data.era,
