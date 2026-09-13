@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sirah Nabawiyah">
+  <rect width="512" height="512" rx="112" fill="#ff6b35"/>
+  <path d="M352 118a190 190 0 1 0 42 262A158 158 0 0 1 352 118z" fill="#fff9e6"/>
+  <path d="M380 150l12.6 34.4a6 6 0 0 0 5.7 4.1l36.6 1-29.2 22.1a6 6 0 0 0-2.2 6.7l10.5 35-30.5-20.3a6 6 0 0 0-7 0l-30.5 20.3 10.5-35a6 6 0 0 0-2.2-6.7l-29.2-22.1 36.6-1a6 6 0 0 0 5.7-4.1z" fill="#fff9e6"/>
+</svg>

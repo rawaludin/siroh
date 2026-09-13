@@ -7,6 +7,7 @@ import "@fontsource/amiri/400.css";
 import "@fontsource/amiri/700.css";
 import "../styles/global.css";
 import PlayerHeader from "../components/PlayerHeader.astro";
+import { pwaInfo } from "virtual:pwa-info";
 
 interface Props {
   title: string;
@@ -21,12 +22,19 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ff6b35" />
+    <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
   </head>
   <body>
     <PlayerHeader />
     <slot />
+    <script>
+      import { registerSW } from "virtual:pwa-register";
+      registerSW({ immediate: true });
+    </script>
     <script>
       const reveal = () => {
         const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
