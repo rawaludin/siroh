@@ -1,4 +1,5 @@
 ---
+const base = "/siroh/";
 import Arabic from "./Arabic.astro";
 import ThemeChips from "./ThemeChips.astro";
 
@@ -25,7 +26,7 @@ const { id, year, title, titleAr, summary, themes, era, searchText } = Astro.pro
   data-themes={JSON.stringify(themes)}
   data-search={searchText}
 >
-  <a href={`/events/${id}/`} class="event-card__link">
+  <a href={`${base}events/${id}/`} class="event-card__link">
     <span class="event-card__year">{year}</span>
     <h3 class="event-card__title">{title}</h3>
     <span class="event-card__title-ar"><Arabic text={titleAr} /></span>

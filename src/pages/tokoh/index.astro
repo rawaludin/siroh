@@ -1,4 +1,5 @@
 ---
+const base = "/siroh/";
 import Base from "../../layouts/Base.astro";
 import Arabic from "../../components/Arabic.astro";
 import { getCollection } from "astro:content";
@@ -8,13 +9,13 @@ const tokoh = (await getCollection("tokoh")).sort((a, b) => a.data.order - b.dat
 
 <Base title="Tokoh Sirah — Sirah Nabawiyah" description="Tokoh-tokoh penting dalam perjalanan hidup Nabi Muhammad ﷺ." total={tokoh.length}>
   <main class="page">
-    <a href="/" class="page__back">← Kembali ke garis waktu</a>
+    <a href={`${base}`} class="page__back">← Kembali ke garis waktu</a>
     <h1 class="page__title">Tokoh Sirah</h1>
     <p class="page__subtitle">Kenali para sahabat dan tokoh penting dalam Sirah Nabawiyah.</p>
 
     <div class="grid">
       {tokoh.map((t) => (
-        <a href={`/tokoh/${t.slug}/`} class="card bouncy" data-reveal>
+        <a href={`${base}tokoh/${t.slug}/`} class="card bouncy" data-reveal>
           <h3 class="card__name">{t.data.name}</h3>
           <span class="card__name-ar"><Arabic text={t.data.nameAr} /></span>
           <span class="card__role">{t.data.role}</span>

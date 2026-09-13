@@ -1,4 +1,5 @@
 ---
+const base = "/siroh/";
 import Base from "../../layouts/Base.astro";
 import Arabic from "../../components/Arabic.astro";
 import { getCollection } from "astro:content";
@@ -8,7 +9,7 @@ const glosarium = (await getCollection("glosarium")).sort((a, b) => a.data.order
 
 <Base title="Glosarium — Sirah Nabawiyah" description="Kamus istilah dalam Sirah Nabawiyah." total={glosarium.length}>
   <main class="page">
-    <a href="/" class="page__back">← Kembali ke garis waktu</a>
+    <a href={`${base}`} class="page__back">← Kembali ke garis waktu</a>
     <h1 class="page__title">Glosarium</h1>
     <p class="page__subtitle">Kamus istilah-istilah penting dalam Sirah Nabawiyah.</p>
 
@@ -22,7 +23,7 @@ const glosarium = (await getCollection("glosarium")).sort((a, b) => a.data.order
 
     <div class="list" id="glossary-list">
       {glosarium.map((g) => (
-        <a href={`/glosarium/${g.id}/`} class="card bouncy" data-term={g.data.term} data-reveal>
+        <a href={`${base}glosarium/${g.id}/`} class="card bouncy" data-term={g.data.term} data-reveal>
           <h3 class="card__term">{g.data.term}</h3>
           <span class="card__term-ar"><Arabic text={g.data.termAr} /></span>
           <p class="card__def">{g.data.definition}</p>

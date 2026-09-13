@@ -1,4 +1,5 @@
 ---
+const base = "/siroh/";
 import Base from "../../layouts/Base.astro";
 import Arabic from "../../components/Arabic.astro";
 import SourceList from "../../components/SourceList.astro";
@@ -35,7 +36,7 @@ const relatedGlosarium = relatedEntries(glosarium, entry.slug);
 
 <Base title={`${entry.data.title} — Sirah Nabawiyah`} description={entry.data.summary} total={all.length}>
   <main class="detail" data-slug={entry.slug}>
-    <a href="/" class="detail__back">← Kembali ke garis waktu</a>
+    <a href={`${base}`} class="detail__back">← Kembali ke garis waktu</a>
     <article class="detail__article">
       <header class="detail__header" style={`--era-color: ${era.color}`}>
         <span class="detail__era">{era.label}</span>
@@ -67,7 +68,7 @@ const relatedGlosarium = relatedEntries(glosarium, entry.slug);
         <h2>Peristiwa terkait</h2>
         <ul>
           {related.map((r) => (
-            <li><a href={`/events/${r.id}/`}>{r.title}</a></li>
+            <li><a href={`${base}events/${r.id}/`}>{r.title}</a></li>
           ))}
         </ul>
       </nav>
@@ -78,7 +79,7 @@ const relatedGlosarium = relatedEntries(glosarium, entry.slug);
         <h2>Tokoh</h2>
         <ul>
           {relatedTokoh.map((t) => (
-            <li><a href={`/tokoh/${t.slug}/`}>{t.data.name}</a></li>
+            <li><a href={`${base}tokoh/${t.slug}/`}>{t.data.name}</a></li>
           ))}
         </ul>
       </nav>
@@ -89,7 +90,7 @@ const relatedGlosarium = relatedEntries(glosarium, entry.slug);
         <h2>Tempat</h2>
         <ul>
           {relatedTempat.map((t) => (
-            <li><a href={`/tempat/${t.id}/`}>{t.data.name}</a></li>
+            <li><a href={`${base}tempat/${t.id}/`}>{t.data.name}</a></li>
           ))}
         </ul>
       </nav>
@@ -100,15 +101,15 @@ const relatedGlosarium = relatedEntries(glosarium, entry.slug);
         <h2>Glosarium</h2>
         <ul>
           {relatedGlosarium.map((g) => (
-            <li><a href={`/glosarium/${g.id}/`}>{g.data.term}</a></li>
+            <li><a href={`${base}glosarium/${g.id}/`}>{g.data.term}</a></li>
           ))}
         </ul>
       </nav>
     )}
 
     <nav class="pager">
-      {prev ? <a href={`/events/${prev.id}/`}>← {prev.title}</a> : <span />}
-      {next ? <a href={`/events/${next.id}/`}>{next.title} →</a> : <span />}
+      {prev ? <a href={`${base}events/${prev.id}/`}>← {prev.title}</a> : <span />}
+      {next ? <a href={`${base}events/${next.id}/`}>{next.title} →</a> : <span />}
     </nav>
   </main>
 </Base>

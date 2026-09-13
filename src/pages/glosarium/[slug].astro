@@ -1,4 +1,5 @@
 ---
+const base = "/siroh/";
 import Base from "../../layouts/Base.astro";
 import Arabic from "../../components/Arabic.astro";
 import { getCollection } from "astro:content";
@@ -17,7 +18,7 @@ const relatedEvents = (entry.data.relatedEvents ?? []).map((slug) => ({ slug, ti
 
 <Base title={`${entry.data.term} — Glosarium Sirah Nabawiyah`} description={entry.data.definition}>
   <main class="detail">
-    <a href="/glosarium/" class="detail__back">← Kembali ke glosarium</a>
+    <a href={`${base}glosarium/`} class="detail__back">← Kembali ke glosarium</a>
     <article class="detail__article">
       <header class="detail__header">
         <h1 class="detail__title">{entry.data.term}</h1>
@@ -32,7 +33,7 @@ const relatedEvents = (entry.data.relatedEvents ?? []).map((slug) => ({ slug, ti
         <h2>Peristiwa terkait</h2>
         <ul>
           {relatedEvents.map((r) => (
-            <li><a href={`/events/${r.slug}/`}>{r.title}</a></li>
+            <li><a href={`${base}events/${r.slug}/`}>{r.title}</a></li>
           ))}
         </ul>
       </nav>
