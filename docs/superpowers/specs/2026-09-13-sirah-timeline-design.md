@@ -140,3 +140,50 @@ all in Indonesian with Arabic originals and precise citations.
 - More eras/events beyond the starter set.
 - Mobile native app.
 - E2E tests.
+
+## Game-like UI (kids 8–12)
+
+The visual system is **game-like and playful**, designed for children.
+
+- **Palette:** bright, saturated, friendly (orange primary, teal secondary,
+  sunny yellow accent, green success, purple/pink highlights) on a warm cream
+  background. High contrast for readability.
+- **Typography:** rounded, chunky display font (Baloo 2) for headings, a
+  rounded readable body font (Nunito), Amiri for Arabic.
+- **Motion:** reveal-on-scroll animations for timeline cards, playful hover
+  bounce, animated progress bars, confetti on achievements. `prefers-reduced-motion`
+  is honored (animations disabled).
+- **Iconography:** playful emoji/icon glyphs for levels, badges, and eras.
+- Copy is age-appropriate Indonesian (short, warm, encouraging).
+
+## Gamification
+
+Reading progress is rewarded, persisted entirely client-side in `localStorage`
+(no backend).
+
+- **Points:** +10 for the first time an event is read.
+- **Levels:** six tiers with Islamic-themed names (Musafir Kecil → … → Bintang
+  Madinah); derived from total points.
+- **Streak:** consecutive days of reading; tracked from the last visit date.
+- **Badges:** achievements — first read, completing each era, 3/7-day streaks,
+  reading all 34 events.
+- **Progress:** overall percent of the 34 events read, shown as a progress bar
+  in a persistent header alongside score, level, and streak.
+- Reading an event marks it read; completed cards show a checkmark; the detail
+  page shows a "+10 poin!" toast with confetti.
+
+All gamification logic lives in `src/lib/gamification.ts` as pure, unit-tested
+functions with a thin `localStorage` persistence wrapper.
+
+## PWA
+
+The app is installable and works offline.
+
+- **Manifest:** `@vite-pwa/astro` generates a web app manifest (name, short
+  name, description, `theme_color`/`background_color` from the palette,
+  `display: standalone`, `start_url: /`).
+- **Service worker:** Workbox (via `@vite-pwa/astro`) precaches the static
+  pages and assets; `registerType: "autoUpdate"` keeps the app current.
+- **Icons:** generated from a single source SVG logo (crescent/mosque motif)
+  into the required sizes (192, 512, maskable) using `pwaAssets`.
+- **Meta:** `theme-color` and apple-touch icon tags in `Base.astro`.

@@ -2495,3 +2495,387 @@ the missing `lessons` and re-run.
 git add -A
 git commit -m "feat: enforce lessons and finalize docs"
 ```
+
+---
+
+# Phase 3 — Game-like UI, Gamification, PWA (added 2026-09-13)
+
+Execution order: Task 17 (design) → Task 12 (content structure) → Task 18–19
+(gamification) → Task 20 (PWA) → Tasks 13–15 (content enrichment) → Task 16
+(final). The design tokens below are the source of truth; existing components
+already reference `--card/--border/--radius/--muted/--accent/--bg`, so
+redefining them re-themes the app without touching every component.
+
+## Task 17: Game-like design system
+
+**Files:**
+- Modify: `package.json` (add fonts)
+- Modify: `src/styles/global.css` (tokens, fonts, animations, reduced-motion)
+- Modify: `src/layouts/Base.astro` (fonts, reveal-on-scroll script)
+- Modify: `src/lib/eras.ts` (bright era colors)
+- Modify: `src/components/EventCard.astro` (reveal + hover bounce)
+- Modify: `src/components/EraSection.astro`, `JumpNav.astro`, `SearchFilter.astro`, `ThemeChips.astro` (rounded/pill styling to match)
+
+- [ ] **Step 1: Add font deps to `package.json`**
+
+Add to `dependencies`: `"@fontsource/baloo-2": "^5.1.0"`, `"@fontsource/nunito": "^5.1.0"`.
+
+- [ ] **Step 2: Rewrite `src/styles/global.css`**
+
+```css
+:root {
+  --primary: #ff6b35;
+  --secondary: #00b4d8;
+  --accent: #ffd166;
+  --success: #06d6a0;
+  --purple: #9b5de5;
+  --pink: #f15bb5;
+  --bg: #fff9e6;
+  --card: #ffffff;
+  --ink: #2b2b3a;
+  --muted: #6b6b7b;
+  --border: #f0e6d2;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --font-display: "Baloo 2", "Amiri", sans-serif;
+  --font-body: "Nunito", sans-serif;
+  --shadow: 0 6px 0 rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; }
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* reveal-on-scroll */
+[data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; }
+[data-reveal].is-visible { opacity: 1; transform: none; }
+
+/* playful bounce on hover */
+.bouncy { transition: transform 0.15s ease; }
+.bouncy:hover { transform: translateY(-4px) scale(1.01); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  [data-reveal] { opacity: 1; transform: none; }
+}
+```
+
+- [ ] **Step 3: Update `src/layouts/Base.astro`**
+
+Import fonts and add a reveal-on-scroll observer script. Replace the font imports block with:
+
+```astro
+import "@fontsource/baloo-2/600.css";
+import "@fontsource/baloo-2/700.css";
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/amiri/400.css";
+import "@fontsource/amiri/700.css";
+```
+
+Add before `</body>`:
+
+```astro
+<script>
+  const reveal = () => {
+    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); } }),
+      { threshold: 0.1 },
+    );
+    els.forEach((el) => io.observe(el));
+  };
+  reveal();
+</script>
+```
+
+- [ ] **Step 4: Update era colors in `src/lib/eras.ts`**
+
+Replace the `color` values: jahiliyyah `#c98a2b`, mecca `#e76f51`, medina `#2a9d8f`, post-fath `#457b9d`.
+
+- [ ] **Step 5: Add reveal + bounce to `EventCard.astro`**
+
+Add `data-reveal` and `bouncy` to the `<article>`: `<article class="event-card bouncy" data-event data-reveal ...>`.
+
+- [ ] **Step 6: Restyle chips/nav to rounded pill look**
+
+In `ThemeChips.astro`, `JumpNav.astro`, `SearchFilter.astro`: use `border-radius: 999px`, add `font-family: var(--font-display)`, and use the bright tokens (`--secondary`/`--purple`/`--pink`) for chip accents. Keep the structure; only adjust colors/radius.
+
+- [ ] **Step 7: Install and build**
+
+Run: `npm install && npx astro build`
+Expected: exit 0, no console errors.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add -A && git commit -m "feat: game-like design system"
+```
+
+## Task 18: Gamification logic + tests
+
+**Files:**
+- Create: `src/lib/gamification.ts`
+- Test: `src/lib/gamification.test.ts`
+
+**Interfaces:** pure functions below (no DOM, no localStorage). Consumed by Task 19 UI.
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+import { describe, it, expect } from "vitest";
+import { computeLevel, awardRead, computeProgress, computeBadges, updateStreak, initialState, POINTS_PER_READ } from "./gamification";
+
+const events = [
+  { id: "a", era: "jahiliyyah" }, { id: "b", era: "jahiliyyah" },
+  { id: "c", era: "mecca" }, { id: "d", era: "medina" }, { id: "e", era: "post-fath" },
+];
+
+describe("computeLevel", () => {
+  it("returns level 1 at 0 points", () => {
+    const l = computeLevel(0);
+    expect(l.level).toBe(1);
+    expect(l.name).toBe("Musafir Kecil");
+  });
+  it("returns a higher level past a threshold", () => {
+    expect(computeLevel(60).level).toBe(2);
+  });
+  it("caps at max level with progress 1", () => {
+    const l = computeLevel(500);
+    expect(l.nextMin).toBeNull();
+    expect(l.progress).toBe(1);
+  });
+});
+
+describe("awardRead", () => {
+  it("awards points once per event", () => {
+    const s0 = initialState();
+    const s1 = awardRead(s0, "a");
+    expect(s1.points).toBe(POINTS_PER_READ);
+    expect(s1.readIds).toEqual(["a"]);
+    expect(awardRead(s1, "a")).toBe(s1);
+  });
+});
+
+describe("computeProgress", () => {
+  it("computes percent", () => {
+    const s = { ...initialState(), readIds: ["a", "b"] };
+    expect(computeProgress(s, 4)).toEqual({ read: 2, total: 4, percent: 50 });
+  });
+});
+
+describe("computeBadges", () => {
+  it("earns first-read and era badges", () => {
+    const s = { ...initialState(), readIds: ["a", "b"] };
+    const ids = computeBadges(s, events).map((b) => b.id);
+    expect(ids).toContain("first-read");
+    expect(ids).toContain("era-jahiliyyah");
+    expect(ids).not.toContain("all-read");
+  });
+  it("earns all-read when every event is read", () => {
+    const s = { ...initialState(), readIds: events.map((e) => e.id) };
+    expect(computeBadges(s, events).map((b) => b.id)).toContain("all-read");
+  });
+});
+
+describe("updateStreak", () => {
+  it("starts streak at 1 on first visit", () => {
+    expect(updateStreak(initialState(), "2026-09-13").streak).toBe(1);
+  });
+  it("increments on consecutive days", () => {
+    const s1 = updateStreak(initialState(), "2026-09-12");
+    expect(updateStreak(s1, "2026-09-13").streak).toBe(2);
+  });
+  it("resets after a gap", () => {
+    const s1 = updateStreak(initialState(), "2026-09-10");
+    expect(updateStreak(s1, "2026-09-13").streak).toBe(1);
+  });
+});
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `npx vitest run src/lib/gamification.test.ts` — expect FAIL (cannot resolve `./gamification`).
+
+- [ ] **Step 3: Write `src/lib/gamification.ts`** (implement all functions + constants/types per the tests, with `POINTS_PER_READ = 10`, `LEVELS`, `BADGES`, `initialState`, `PlayerState`, `Badge`, `EventMeta`).
+
+- [ ] **Step 4: Run to verify it passes**
+
+Run: `npx vitest run src/lib/gamification.test.ts` — expect all pass.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/gamification.ts src/lib/gamification.test.ts && git commit -m "feat: gamification logic"
+```
+
+## Task 19: Gamification UI & reading rewards
+
+**Files:**
+- Create: `src/components/PlayerHeader.astro`
+- Modify: `src/layouts/Base.astro` (render `<PlayerHeader />`)
+- Modify: `src/pages/events/[slug].astro` (mark read + award + confetti)
+- Modify: `src/components/EventCard.astro` (read checkmark via `data-read`)
+
+**Interfaces:** consumes `computeLevel/awardRead/computeProgress/computeBadges/updateStreak` and `initialState` from `src/lib/gamification.ts`. Persists `PlayerState` to `localStorage` key `"siroh-player"`. Uses a global `window` event `"siroh:updated"` to sync the header.
+
+- [ ] **Step 1: Write `src/components/PlayerHeader.astro`**
+
+A sticky top bar showing, left-to-right: level icon + name, points ("X poin"), streak ("🔥 N hari"), and a progress bar with "N%" label. Includes a client script that loads state from `localStorage`, renders via `computeLevel`/`computeProgress` (with total = 34), and listens for the `"siroh:updated"` event to re-render.
+
+```astro
+---
+// PlayerHeader.astro — sticky gamification bar
+---
+<header class="player" id="player-header">
+  <div class="player__level"><span id="level-icon">🐪</span> <strong id="level-name">Musafir Kecil</strong></div>
+  <div class="player__stats">
+    <span id="points">0 poin</span>
+    <span id="streak">🔥 0 hari</span>
+  </div>
+  <div class="player__progress">
+    <div class="player__bar"><div id="progress-fill"></div></div>
+    <span id="progress-label">0%</span>
+  </div>
+</header>
+
+<style>
+  .player {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    background: linear-gradient(90deg, var(--primary), var(--pink));
+    color: #fff; padding: 0.6rem 1rem; border-radius: 0 0 var(--radius) var(--radius);
+    font-family: var(--font-display);
+  }
+  .player__level { display: flex; align-items: center; gap: 0.4rem; }
+  .player__stats { display: flex; gap: 1rem; }
+  .player__progress { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 120px; }
+  .player__bar { flex: 1; height: 12px; background: rgba(255,255,255,0.35); border-radius: 999px; overflow: hidden; }
+  #progress-fill { height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.4s ease; }
+</style>
+
+<script>
+  import { computeLevel, computeProgress, initialState } from "../lib/gamification";
+
+  const TOTAL = 34;
+  const KEY = "siroh-player";
+  const load = () => { try { return { ...initialState(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; } catch { return initialState(); } };
+
+  function render() {
+    const s = load();
+    const lvl = computeLevel(s.points);
+    const prog = computeProgress(s, TOTAL);
+    document.getElementById("level-icon")!.textContent = lvl.icon;
+    document.getElementById("level-name")!.textContent = lvl.name;
+    document.getElementById("points")!.textContent = `${s.points} poin`;
+    document.getElementById("streak")!.textContent = `🔥 ${s.streak} hari`;
+    (document.getElementById("progress-fill") as HTMLElement).style.width = `${prog.percent}%`;
+    document.getElementById("progress-label")!.textContent = `${prog.percent}%`;
+  }
+
+  render();
+  window.addEventListener("siroh:updated", render);
+</script>
+```
+
+- [ ] **Step 2: Render `<PlayerHeader />` in `Base.astro`**
+
+Add `import PlayerHeader from "../components/PlayerHeader.astro";` and render `<PlayerHeader />` immediately after `<body>`'s opening `<slot />`? No — render it as the first child of `<body>`, before `<slot />`:
+
+```astro
+<body>
+  <PlayerHeader />
+  <slot />
+</body>
+```
+
+- [ ] **Step 3: Mark read + award on the detail page**
+
+In `[slug].astro`, add a `<script>` that on load: loads state, `updateStreak(state, today)` + `awardRead(state, slug)` (using the current event slug), saves, dispatches `window.dispatchEvent(new Event("siroh:updated"))`, and shows a "+10 poin!" toast plus a small confetti burst. Confetti is a tiny inline function (no dependency) that appends ~30 absolutely-positioned colored divs that animate and remove themselves. Get the slug in the script from a `data-slug` attribute on `<main>`.
+
+- [ ] **Step 4: Read checkmark on cards**
+
+In `EventCard.astro`, add a client script that reads state and adds a `data-read` class (a ✓ badge) to cards whose id is in `readIds`, re-rendering on `"siroh:updated"`. Cards carry `data-event-id` (the event id).
+
+- [ ] **Step 5: Build and verify**
+
+Run: `npx astro build`
+Expected: exit 0. Manual check: reading an event increments points and the header progress bar.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/components/PlayerHeader.astro src/layouts/Base.astro src/pages/events/[slug].astro src/components/EventCard.astro
+git commit -m "feat: gamification UI and reading rewards"
+```
+
+## Task 20: PWA
+
+**Files:**
+- Modify: `package.json` (add `@vite-pwa/astro`)
+- Modify: `astro.config.mjs`
+- Create: `public/icons/icon.svg`
+- Modify: `src/layouts/Base.astro` (theme-color + apple-touch meta)
+
+- [ ] **Step 1: Add dependency** — `"@vite-pwa/astro": "^1.0.0"` to `dependencies`.
+
+- [ ] **Step 2: Write `public/icons/icon.svg`** — a simple crescent-and-star motif on the primary color (a 512×512 SVG).
+
+- [ ] **Step 3: Configure `astro.config.mjs`**
+
+```js
+import { defineConfig } from "astro/config";
+import mdx from "@astrojs/mdx";
+import { VitePWA } from "@vite-pwa/astro";
+
+export default defineConfig({
+  integrations: [
+    mdx(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["icons/icon.svg"],
+      manifest: {
+        name: "Sirah Nabawiyah",
+        short_name: "Sirah",
+        description: "Garis waktu interaktif kehidupan Nabi Muhammad ﷺ untuk anak-anak.",
+        theme_color: "#ff6b35",
+        background_color: "#fff9e6",
+        display: "standalone",
+        start_url: "/",
+      },
+      pwaAssets: { image: "public/icons/icon.svg" },
+    }),
+  ],
+});
+```
+
+- [ ] **Step 4: Add meta to `Base.astro`**
+
+```astro
+<meta name="theme-color" content="#ff6b35" />
+<link rel="apple-touch-icon" href="/icons/icon.svg" />
+```
+
+- [ ] **Step 5: Install and build**
+
+Run: `npm install && npx astro build`
+Expected: exit 0; `dist/` contains `manifest.webmanifest`, `sw.js` (or similar), and generated icon files.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add -A && git commit -m "feat: pwa support"
+```
