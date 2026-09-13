@@ -51,6 +51,7 @@ interface Event {
   location?: string;
   themes: string[];      // e.g. "battles", "family", "revelation", "migration"
   sources: Source[];     // at least one required
+  lessons: string[];     // "what we can learn from it" — at least one required
   relatedEvents?: string[]; // event ids
 }
 
@@ -92,6 +93,26 @@ interface Source {
 - `lang="ar" dir="rtl"` on Arabic runs.
 - Arabic in frontmatter fields and inline in MDX bodies.
 
+## Content Depth & Lessons
+
+Each event's narrative must be detailed, not a summary: full story with
+**dialogues/conversations**, relevant **Quranic verses**, and **hadith**,
+all in Indonesian with Arabic originals and precise citations.
+
+- **Verses** are rendered via a `Verse` component: Arabic (RTL) + Indonesian
+  translation + citation (`QS. <surah>:<ayat>`).
+- **Hadith** are rendered via a `Hadith` component: Arabic (RTL) + Indonesian
+  translation + citation (`HR. <perawi> no. <n>`), with an optional
+  `sunnah.com` link.
+- **Dialogues** are written as prose with quoted speech.
+- **Lessons:** every event carries a `lessons` array in frontmatter — the
+  "what we can learn from it" (pelajaran/hikmah) points, grounded in the
+  cited sources (not free-form opinion). Rendered on the detail page as a
+  "Pelajaran / Hikmah" section.
+- Accuracy is paramount: verses and hadith must be authentic and correctly
+  referenced (Sahih al-Bukhari/Muslim via sunnah.com, Ar-Raheeq Al-Makhtum,
+  Sirah Ibn Hisham). No fabricated citations.
+
 ## Sources & References
 
 - Each event carries a `sources` list in frontmatter (title, author, precise reference, optional link).
@@ -108,6 +129,9 @@ interface Source {
 
 - ~30–40 curated key events spanning all four eras: birth (c. 570 M), early life, first revelation, Meccan trials, Hijrah, major battles (Badr, Uhud, Khandaq), Hudaybiyyah, Fath Makkah, Farewell Pilgrimage, wafat (11 H / 632 M).
 - Indonesian prose, Arabic titles, theme tags, 1–3 verifiable sources each.
+- **Detailed narrative** per event: dialogues, Quranic verses, and hadith
+  (Arabic + Indonesian translation + citation), plus a `lessons` list
+  ("what we can learn from it").
 - Research against reliable, freely-accessible references: Ar-Raheeq Al-Makhtum (English/Indonesian translations), Sahih hadith via sunnah.com, standard seerah chronologies.
 
 ## Out of Scope / Future

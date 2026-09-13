@@ -2225,3 +2225,273 @@ Era: `jahiliyyah`, `mecca`, `medina`, `post-fath`.
 git add README.md
 git commit -m "docs: add README"
 ```
+
+---
+
+# Phase 2 — Content Enrichment (added 2026-09-13)
+
+The spec now requires full-depth content (dialogues, Quranic verses, hadith,
+with citations) plus a `lessons` ("what we can learn from it") list per event.
+Tasks 12–16 implement this. They supersede the old Task 11 (final validation +
+README), which is now Task 16.
+
+## Content Enrichment Standard (applies to Tasks 13–15)
+
+Each event MDX file is REWRITTEN to include:
+
+1. **Detailed narrative** in Indonesian (3–6 substantial paragraphs, not a
+   summary) that tells the story fully, including **dialogues/conversations**
+   written as quoted speech (e.g. “Iqra'!” — “Aku tidak bisa membaca.”).
+2. **Quranic verses** where relevant, using the `<Verse>` component:
+   `<Verse arabic="…" translation="…" source="QS. Asy-Syu'ara: 214" />`.
+3. **Hadith** where relevant, using the `<Hadith>` component:
+   `<Hadith arabic="…" translation="…" source="HR. Al-Bukhari no. 3" link="https://sunnah.com/bukhari:3" />`.
+4. **`lessons`** in frontmatter: 3–5 strings, each a self-contained
+   "what we can learn from it" statement, grounded in the cited sources
+   (no free-form opinion).
+5. **`sources`** retained/expanded (1–3 entries), with precise references.
+
+**Accuracy rules (mandatory):**
+- Verses must be authentic with correct `QS. <surah>:<ayat>` references.
+- Hadith must be authentic (Sahih al-Bukhari / Sahih Muslim preferred) with
+  correct perawi + number and a `sunnah.com` link where possible.
+- Do NOT invent or approximate citations. If unsure of an exact hadith
+  number, cite the kitab/chapter instead (e.g. "HR. Al-Bukhari, Kitab
+  Bad' al-Wahyi").
+- Source base: Ar-Raheeq Al-Makhtum (Syaikh Shafiyyurrahman Al-Mubarakfuri),
+  Sirah Nabawiyah Ibnu Hisyam, Sahih al-Bukhari/Muslim via sunnah.com.
+- Tone: Indonesian, respectful; write "ﷺ" after the Prophet's name;
+  capitalize "Beliau".
+
+**MDX layout per file:**
+```mdx
+---
+order: 7
+year: "610 M (Ramadan)"
+era: "mecca"
+title: "Wahyu Pertama di Gua Hira"
+titleAr: "أول الوحي في غار حراء"
+summary: "…"
+location: "Gua Hira, Makkah"
+themes: ["wahyu", "dakwah"]
+sources:
+  - title: "Sahih al-Bukhari"
+    author: "Imam Al-Bukhari"
+    reference: "Hadis no. 3 (Bab Permulaan Wahyu)"
+    link: "https://sunnah.com/bukhari:3"
+  - title: "Ar-Raheeq Al-Makhtum (Sirah Nabawiyah)"
+    author: "Syaikh Shafiyyurrahman Al-Mubarakfuri"
+    reference: "Bab 'Di Gua Hira'"
+lessons:
+  - "…"
+  - "…"
+  - "…"
+related: ["…"]
+---
+import Verse from "../../components/Verse.astro";
+import Hadith from "../../components/Hadith.astro";
+
+<narrative paragraphs…>
+
+<Verse arabic="…" translation="…" source="QS. …" />
+
+<Hadith arabic="…" translation="…" source="HR. …" link="…" />
+```
+
+## Task 12: Lessons field, Verse/Hadith components, detail-page lessons
+
+**Files:**
+- Modify: `src/content/config.ts` (add `lessons`)
+- Create: `src/components/Verse.astro`
+- Create: `src/components/Hadith.astro`
+- Modify: `src/pages/events/[slug].astro` (render lessons section)
+
+**Interfaces:**
+- Produces: `Verse` and `Hadith` MDX components; `lessons` schema field.
+  Consumed by content tasks 13–15 and the detail page.
+
+- [ ] **Step 1: Add `lessons` to the schema (temporarily optional)**
+
+In `src/content/config.ts`, add after the `related` line:
+```ts
+      lessons: z.array(z.string()).optional(),
+```
+(Optional here so the existing 34 files still validate; Task 16 flips it to
+`.min(1)` to enforce completeness once all content is enriched.)
+
+- [ ] **Step 2: Write `src/components/Verse.astro`**
+
+```astro
+---
+interface Props {
+  arabic: string;
+  translation: string;
+  source: string;
+}
+const { arabic, translation, source } = Astro.props;
+---
+<figure class="verse">
+  <blockquote lang="ar" dir="rtl" class="verse__arabic">{arabic}</blockquote>
+  <figcaption class="verse__translation">“{translation}”</figcaption>
+  <cite class="verse__source">{source}</cite>
+</figure>
+
+<style>
+  .verse {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: #f4efe6;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+  }
+  .verse__arabic { margin: 0; font-size: 1.5rem; line-height: 1.9; color: #3a3328; }
+  .verse__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
+  .verse__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+</style>
+```
+
+- [ ] **Step 3: Write `src/components/Hadith.astro`**
+
+```astro
+---
+interface Props {
+  arabic: string;
+  translation: string;
+  source: string;
+  link?: string;
+}
+const { arabic, translation, source, link } = Astro.props;
+---
+<figure class="hadith">
+  <blockquote lang="ar" dir="rtl" class="hadith__arabic">{arabic}</blockquote>
+  <figcaption class="hadith__translation">“{translation}”</figcaption>
+  <cite class="hadith__source">
+    {link ? <a href={link} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+  </cite>
+</figure>
+
+<style>
+  .hadith {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: #eef4f0;
+    border-left: 3px solid #2d8a4e;
+    border-radius: var(--radius);
+  }
+  .hadith__arabic { margin: 0; font-size: 1.4rem; line-height: 1.9; color: #2b2722; }
+  .hadith__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
+  .hadith__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+</style>
+```
+
+- [ ] **Step 4: Render lessons on the detail page**
+
+In `src/pages/events/[slug].astro`, insert after the `<div class="detail__body">…</div>` block and before `<SourceList … />`:
+
+```astro
+      {entry.data.lessons && entry.data.lessons.length > 0 && (
+        <section class="lessons">
+          <h2>Pelajaran / Hikmah</h2>
+          <ol>
+            {entry.data.lessons.map((l) => <li>{l}</li>)}
+          </ol>
+        </section>
+      )}
+```
+
+And add scoped style:
+```css
+  .lessons { margin-top: 2rem; }
+  .lessons h2 { font-size: 1.1rem; }
+  .lessons ol { padding-left: 1.2rem; color: var(--muted); }
+  .lessons li { margin-bottom: 0.5rem; }
+```
+
+- [ ] **Step 5: Verify build**
+
+Run: `npx astro build`
+Expected: exit 0 (existing 34 files still validate with optional `lessons`).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/content/config.ts src/components/Verse.astro src/components/Hadith.astro src/pages/events/[slug].astro
+git commit -m "feat: add lessons field and verse/hadith components"
+```
+
+## Task 13: Enrich Jahiliyyah & Mecca events
+
+**Files:** Modify all 17 files in `src/content/events/` with era `jahiliyyah`
+or `mecca` (orders 1–17): `kelahiran-nabi`, `yatim-di-pengasuhan`,
+`perjalanan-ke-syam`, `perang-fijar-hilf-al-fudul`, `pernikahan-khadijah`,
+`peletakan-hajar-aswad`, `wahyu-pertama`, `dakwah-sembunyi`,
+`dakwah-terang-terangan`, `penindasan-quraisy`, `hijrah-ke-habasyah`,
+`islamnya-hamzah-dan-umar`, `pemboikotan-bani-hasyim`, `tahun-kesedihan`,
+`isra-miraj`, `baiat-aqabah-pertama`, `baiat-aqabah-kedua`.
+
+**Interfaces:** Follows the Content Enrichment Standard above. Uses `Verse`
+and `Hadith` components. Adds `lessons` to frontmatter.
+
+- [ ] **Step 1: Rewrite all 17 files** per the standard (detailed narrative
+  + dialogues + verses + hadith + lessons + sources).
+- [ ] **Step 2: Verify** — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3: Commit** — `git add src/content/events/ && git commit -m "feat: enrich jahiliyyah and mecca events"`
+
+## Task 14: Enrich Medina events
+
+**Files:** Modify all 11 files with era `medina` (orders 18–28):
+`hijrah-ke-madinah`, `masjid-nabawi-dan-persaudaraan`, `piagam-madinah`,
+`perang-badar`, `perang-uhud`, `perang-khandaq`, `perjanjian-hudaibiyah`,
+`surat-kepada-para-raja`, `perang-khaibar`, `umrah-qadha`, `perang-mutah`.
+
+- [ ] **Step 1: Rewrite all 11 files** per the standard.
+- [ ] **Step 2: Verify** — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3: Commit** — `git add src/content/events/ && git commit -m "feat: enrich medina events"`
+
+## Task 15: Enrich Post-Fath events
+
+**Files:** Modify all 6 files with era `post-fath` (orders 29–34):
+`fathu-makkah`, `perang-hunain-dan-thaif`, `perang-tabuk`, `tahun-delegasi`,
+`haji-wada`, `wafatnya-nabi`.
+
+- [ ] **Step 1: Rewrite all 6 files** per the standard.
+- [ ] **Step 2: Verify** — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3: Commit** — `git add src/content/events/ && git commit -m "feat: enrich post-fath events"`
+
+## Task 16: Enforce lessons, final validation & README
+
+**Files:**
+- Modify: `src/content/config.ts` (flip `lessons` to required)
+- Modify: `README.md` (document lessons + verse/hadith components)
+
+- [ ] **Step 1: Make `lessons` required**
+
+In `src/content/config.ts`, change:
+```ts
+      lessons: z.array(z.string()).optional(),
+```
+to:
+```ts
+      lessons: z.array(z.string()).min(1),
+```
+
+- [ ] **Step 2: Run the full test suite**
+
+Run: `npm test`
+Expected: all Vitest tests pass.
+
+- [ ] **Step 3: Run the production build**
+
+Run: `npm run build`
+Expected: exit 0; if any event is missing `lessons`, the build fails — add
+the missing `lessons` and re-run.
+
+- [ ] **Step 4: Update `README.md`** to mention the `lessons` frontmatter
+  field and the `Verse`/`Hadith` MDX components.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add -A
+git commit -m "feat: enforce lessons and finalize docs"
+```
