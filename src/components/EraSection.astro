@@ -1,0 +1,52 @@
+---
+import type { Era } from "../lib/eras";
+import type { EventData } from "../lib/events";
+import EventCard from "./EventCard.astro";
+import Arabic from "./Arabic.astro";
+
+interface Props {
+  era: Era;
+  events: EventData[];
+}
+
+const { era, events } = Astro.props;
+---
+
+<section class="era" id={`era-${era.id}`} data-era-section={`era-${era.id}`} style={`--era-color: ${era.color}`}>
+  <header class="era__header">
+    <span class="era__ar"><Arabic text={era.labelAr} /></span>
+    <h2 class="era__label">{era.label}</h2>
+    <p class="era__desc">{era.description}</p>
+  </header>
+  <div class="era__timeline">
+    {events.map((e) => <EventCard {...e} />)}
+  </div>
+</section>
+
+<style>
+  .era { margin: 2.5rem 0; }
+  .era__header {
+    border-left: 4px solid var(--era-color);
+    padding-left: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .era__ar { display: block; color: var(--era-color); font-size: 1.4rem; }
+  .era__label { margin: 0.2rem 0; }
+  .era__desc { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .era__timeline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    border-left: 2px solid var(--border);
+    padding-left: 1.5rem;
+    margin-left: 0.4rem;
+  }
+  @media (min-width: 720px) {
+    .era__timeline { grid-template-columns: 1fr 1fr; }
+  }
+  .era__timeline:empty::after {
+    content: "Tidak ada peristiwa yang cocok dengan filter.";
+    color: var(--muted);
+    font-style: italic;
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+interface Props {
+  themes: string[];
+}
+
+const { themes } = Astro.props;
+const labels: Record<string, string> = {
+  kelahiran: "Kelahiran",
+  keluarga: "Keluarga",
+  wahyu: "Wahyu",
+  dakwah: "Dakwah",
+  hijrah: "Hijrah",
+  perang: "Perang",
+  perjanjian: "Perjanjian",
+  diplomasi: "Diplomasi",
+  penaklukan: "Penaklukan",
+  haji: "Haji",
+  kepemimpinan: "Kepemimpinan",
+  pemboikotan: "Pemboikotan",
+  "isra-miraj": "Isra' Mi'raj",
+  persaudaraan: "Persaudaraan",
+  "masa-kecil": "Masa Kecil",
+  "masa-muda": "Masa Muda",
+};
+---
+
+<div class="theme-chips">
+  {themes.map((t) => <span class="chip">{labels[t] ?? t}</span>)}
+</div>
+
+<style>
+  .theme-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .chip {
+    font-size: 0.75rem;
+    background: #f0ebe1;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+  }
+</style>

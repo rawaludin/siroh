@@ -1,0 +1,35 @@
+---
+import { ERAS } from "../lib/eras";
+---
+
+<nav class="jump-nav">
+  <span class="jump-nav__label">Lompat ke:</span>
+  {ERAS.map((era) => (
+    <a href={`#era-${era.id}`} class="jump-nav__link" style={`--era-color: ${era.color}`}>
+      {era.label}
+    </a>
+  ))}
+</nav>
+
+<style>
+  .jump-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    background: var(--bg);
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .jump-nav__label { color: var(--muted); align-self: center; font-size: 0.85rem; }
+  .jump-nav__link {
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+    color: var(--text);
+  }
+  .jump-nav__link:hover { background: var(--era-color); color: #fff; text-decoration: none; }
+</style>
