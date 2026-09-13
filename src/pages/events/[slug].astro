@@ -6,6 +6,7 @@ import ThemeChips from "../../components/ThemeChips.astro";
 import { getCollection, render } from "astro:content";
 import { sortChronological, toEventData } from "../../lib/events";
 import { getEra } from "../../lib/eras";
+import { relatedEntries } from "../../lib/related";
 
 export async function getStaticPaths() {
   const events = await getCollection("events");
@@ -23,6 +24,13 @@ const era = getEra(entry.data.era);
 const related = (entry.data.related ?? [])
   .map((id) => all.find((e) => e.id === id))
   .filter((e): e is NonNullable<typeof e> => Boolean(e));
+
+const tokoh = await getCollection("tokoh");
+const tempat = await getCollection("tempat");
+const glosarium = await getCollection("glosarium");
+const relatedTokoh = relatedEntries(tokoh, entry.slug);
+const relatedTempat = relatedEntries(tempat, entry.slug);
+const relatedGlosarium = relatedEntries(glosarium, entry.slug);
 ---
 
 <Base title={`${entry.data.title} — Sirah Nabawiyah`} description={entry.data.summary} total={all.length}>
@@ -60,6 +68,39 @@ const related = (entry.data.related ?? [])
         <ul>
           {related.map((r) => (
             <li><a href={`/events/${r.id}/`}>{r.title}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {relatedTokoh.length > 0 && (
+      <nav class="related">
+        <h2>Tokoh</h2>
+        <ul>
+          {relatedTokoh.map((t) => (
+            <li><a href={`/tokoh/${t.slug}/`}>{t.data.name}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {relatedTempat.length > 0 && (
+      <nav class="related">
+        <h2>Tempat</h2>
+        <ul>
+          {relatedTempat.map((t) => (
+            <li><a href={`/tempat/${t.id}/`}>{t.data.name}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {relatedGlosarium.length > 0 && (
+      <nav class="related">
+        <h2>Glosarium</h2>
+        <ul>
+          {relatedGlosarium.map((g) => (
+            <li><a href={`/glosarium/${g.id}/`}>{g.data.term}</a></li>
           ))}
         </ul>
       </nav>
