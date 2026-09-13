@@ -3,6 +3,8 @@ import mdx from "@astrojs/mdx";
 import AstroPWA from "@vite-pwa/astro";
 
 export default defineConfig({
+  site: "https://rawaludin.github.io",
+  base: "/siroh/",
   server: { host: true },
   preview: { host: true },
   integrations: [
@@ -19,7 +21,8 @@ export default defineConfig({
         theme_color: "#ff6b35",
         background_color: "#fff9e6",
         display: "standalone",
-        start_url: "/",
+        start_url: "/siroh/",
+        scope: "/siroh/",
         icons: [
           { src: "icons/pwa-64x64.png", sizes: "64x64", type: "image/png" },
           { src: "icons/pwa-192x192.png", sizes: "192x192", type: "image/png" },
