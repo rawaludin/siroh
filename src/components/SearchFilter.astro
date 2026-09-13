@@ -64,13 +64,14 @@ const themes: Array<{ id: string; label: string }> = [
   .filter__group legend { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.35rem; width: 100%; }
   .filter__chip {
     font-size: 0.8rem;
+    font-family: var(--font-display);
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 0.15rem 0.6rem;
     cursor: pointer;
   }
   .filter__chip input { display: none; }
-  .filter__chip:has(input:checked) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .filter__chip:has(input:checked) { background: var(--secondary); color: #fff; border-color: var(--secondary); }
   .filter__count { color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0; }
 </style>
 

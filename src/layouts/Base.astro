@@ -1,4 +1,8 @@
 ---
+import "@fontsource/baloo-2/600.css";
+import "@fontsource/baloo-2/700.css";
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/700.css";
 import "@fontsource/amiri/400.css";
 import "@fontsource/amiri/700.css";
 import "../styles/global.css";
@@ -21,5 +25,16 @@ const { title, description } = Astro.props;
   </head>
   <body>
     <slot />
+    <script>
+      const reveal = () => {
+        const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
+        const io = new IntersectionObserver(
+          (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); } }),
+          { threshold: 0.1 },
+        );
+        els.forEach((el) => io.observe(el));
+      };
+      reveal();
+    </script>
   </body>
 </html>

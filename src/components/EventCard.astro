@@ -17,8 +17,9 @@ const { id, year, title, titleAr, summary, themes, era, searchText } = Astro.pro
 ---
 
 <article
-  class="event-card"
+  class="event-card bouncy"
   data-event
+  data-reveal
   data-era={era}
   data-themes={JSON.stringify(themes)}
   data-search={searchText}
