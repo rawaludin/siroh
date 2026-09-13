@@ -3,6 +3,8 @@ import mdx from "@astrojs/mdx";
 import AstroPWA from "@vite-pwa/astro";
 
 export default defineConfig({
+  server: { host: true },
+  preview: { host: true },
   integrations: [
     mdx(),
     AstroPWA({
