@@ -187,3 +187,15 @@ The app is installable and works offline.
 - **Icons:** generated from a single source SVG logo (crescent/mosque motif)
   into the required sizes (192, 512, maskable) using `pwaAssets`.
 - **Meta:** `theme-color` and apple-touch icon tags in `Base.astro`.
+
+## Arabic for dialogues
+
+Every **conversation/dialogue** in the narrative must include its Arabic
+original alongside the Indonesian translation, with a **clear reference** to
+the source of the Arabic text.
+
+- Rendered via a `Dialogue` component: Arabic (RTL) + Indonesian translation +
+  source citation (hadith perawi/number with `sunnah.com` link, or seerah
+  book chapter).
+- Arabic must be authentic and correctly sourced; if the exact Arabic is
+  uncertain, do not fabricate — omit the Arabic and cite the seerah source.

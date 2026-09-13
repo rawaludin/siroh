@@ -2998,3 +2998,62 @@ Expected: exit 0; `dist/` contains `manifest.webmanifest`, `sw.js` (or similar),
 ```bash
 git add -A && git commit -m "feat: pwa support"
 ```
+
+---
+
+# Phase 4 — Arabic dialogues + retrofit (added 2026-09-13)
+
+## Task 12b: Dialogue component
+
+**Files:** Create `src/components/Dialogue.astro`.
+
+- [ ] **Step 1: Write `src/components/Dialogue.astro`**
+
+```astro
+---
+interface Props {
+  arabic: string;
+  translation: string;
+  source: string;
+  link?: string;
+}
+const { arabic, translation, source, link } = Astro.props;
+---
+<figure class="dialogue">
+  <blockquote lang="ar" dir="rtl" class="dialogue__arabic">{arabic}</blockquote>
+  <figcaption class="dialogue__translation">“{translation}”</figcaption>
+  <cite class="dialogue__source">
+    {link ? <a href={link} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+  </cite>
+</figure>
+
+<style>
+  .dialogue {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: #fdf0f5;
+    border-left: 3px solid var(--pink);
+    border-radius: var(--radius);
+  }
+  .dialogue__arabic { margin: 0; font-size: 1.35rem; line-height: 1.9; color: #3a2b33; }
+  .dialogue__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
+  .dialogue__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+</style>
+```
+
+- [ ] **Step 2: Build** — `npx astro build` (exit 0).
+
+- [ ] **Step 3: Commit** — `git add src/components/Dialogue.astro && git commit -m "feat: add dialogue component"`
+
+## Task 21: Retrofit Arabic dialogues into Jahiliyyah/Mecca & Medina events
+
+**Files:** Modify the 28 event files enriched in Tasks 13 & 14 (`src/content/events/*.mdx` with era `jahiliyyah`, `mecca`, or `medina`).
+
+- [ ] **Step 1:** For every dialogue/quoted conversation, replace the inline
+  Indonesian quote with a `<Dialogue arabic="…" translation="…" source="…" />`
+  component carrying the Arabic original + Indonesian translation + a clear
+  reference (hadith perawi/number + `sunnah.com` link, or seerah chapter).
+  Import `Dialogue` at the top of each file. Do NOT alter frontmatter or
+  other prose; only dialogue treatment.
+- [ ] **Step 2:** Verify — `npx astro sync && npx astro build` (exit 0).
+- [ ] **Step 3:** Commit — `git add src/content/events/ && git commit -m "feat: add arabic to dialogues (jahiliyyah/mecca/medina)"`
