@@ -1,6 +1,6 @@
 ---
 interface Props {
-  arabic: string;
+  arabic?: string;
   translation: string;
   source: string;
   link?: string;
@@ -8,7 +8,7 @@ interface Props {
 const { arabic, translation, source, link } = Astro.props;
 ---
 <figure class="dialogue">
-  <blockquote lang="ar" dir="rtl" class="dialogue__arabic">{arabic}</blockquote>
+  {arabic && <blockquote lang="ar" dir="rtl" class="dialogue__arabic">{arabic}</blockquote>}
   <figcaption class="dialogue__translation">“{translation}”</figcaption>
   <cite class="dialogue__source">
     {link ? <a href={link} target="_blank" rel="noopener noreferrer">{source}</a> : source}
