@@ -15,6 +15,18 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+
+const WA_NUMBER = "628112071744";
+const WA_MESSAGE = [
+  "Assalamu'alaikum, saya ingin memberi masukan untuk aplikasi Sirah Nabawiyah.",
+  "",
+  "Nama: ",
+  "Nomor HP/WA: ",
+  "Email (opsional): ",
+  "",
+  "Masukan saya: ",
+].join("\n");
+const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)}`;
 ---
 
 <!doctype html>
@@ -34,7 +46,7 @@ const { title, description } = Astro.props;
     <footer class="site-footer">
       <a
         class="site-footer__feedback"
-        href="https://wa.me/628112071744?text=Assalamu'alaikum%2C%20saya%20ingin%20memberi%20masukan%20untuk%20aplikasi%20Sirah%20Nabawiyah."
+        href={waLink}
         target="_blank"
         rel="noopener noreferrer"
       >
