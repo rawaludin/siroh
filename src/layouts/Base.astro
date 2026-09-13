@@ -31,6 +31,16 @@ const { title, description } = Astro.props;
   <body>
     <PlayerHeader />
     <slot />
+    <footer class="site-footer">
+      <a
+        class="site-footer__feedback"
+        href="https://wa.me/628112071744?text=Assalamu'alaikum%2C%20saya%20ingin%20memberi%20masukan%20untuk%20aplikasi%20Sirah%20Nabawiyah."
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        💬 Ada masukan? Kirim via WhatsApp
+      </a>
+    </footer>
     <script>
       import { registerSW } from "virtual:pwa-register";
       registerSW({ immediate: true });
@@ -77,3 +87,19 @@ const { title, description } = Astro.props;
     </script>
   </body>
 </html>
+
+<style>
+  .site-footer {
+    text-align: center;
+    padding: 2rem 1rem 2.5rem;
+  }
+  .site-footer__feedback {
+    display: inline-block;
+    font-family: var(--font-display);
+    background: var(--success);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.5rem 1.2rem;
+  }
+  .site-footer__feedback:hover { text-decoration: none; opacity: 0.92; }
+</style>
