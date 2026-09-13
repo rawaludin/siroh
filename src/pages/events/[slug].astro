@@ -42,6 +42,15 @@ const related = (entry.data.related ?? [])
         <Content />
       </div>
 
+      {entry.data.lessons && entry.data.lessons.length > 0 && (
+        <section class="lessons">
+          <h2>Pelajaran / Hikmah</h2>
+          <ol>
+            {entry.data.lessons.map((l) => <li>{l}</li>)}
+          </ol>
+        </section>
+      )}
+
       <SourceList sources={entry.data.sources} />
     </article>
 
@@ -74,6 +83,10 @@ const related = (entry.data.related ?? [])
   .detail__location { color: var(--muted); font-size: 0.9rem; margin: 0.25rem 0 0.75rem; }
   .detail__body { font-size: 1.05rem; }
   .detail__body :global(.arabic) { font-size: 1.2em; }
+  .lessons { margin-top: 2rem; }
+  .lessons h2 { font-size: 1.1rem; }
+  .lessons ol { padding-left: 1.2rem; color: var(--muted); }
+  .lessons li { margin-bottom: 0.5rem; }
   .related, .pager { margin-top: 2rem; }
   .pager { display: flex; justify-content: space-between; gap: 1rem; }
 </style>

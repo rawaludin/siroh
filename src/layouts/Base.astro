@@ -36,5 +36,34 @@ const { title, description } = Astro.props;
       };
       reveal();
     </script>
+    <script>
+      let current: HTMLAudioElement | null = null;
+      let currentBtn: HTMLButtonElement | null = null;
+      document.addEventListener("click", (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-play-audio]");
+        if (!btn) return;
+        e.preventDefault();
+        if (current && currentBtn === btn) {
+          current.pause();
+          current = null;
+          currentBtn?.classList.remove("is-playing");
+          currentBtn = null;
+          return;
+        }
+        current?.pause();
+        currentBtn?.classList.remove("is-playing");
+        const urls: string[] = JSON.parse(btn.dataset.playAudio ?? "[]");
+        if (urls.length === 0) return;
+        const play = (i: number) => {
+          if (i >= urls.length) { currentBtn?.classList.remove("is-playing"); current = null; currentBtn = null; return; }
+          current = new Audio(urls[i]);
+          current.onended = () => play(i + 1);
+          current.play();
+        };
+        currentBtn = btn;
+        btn.classList.add("is-playing");
+        play(0);
+      });
+    </script>
   </body>
 </html>

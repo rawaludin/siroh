@@ -44,6 +44,7 @@ export const collections = {
         )
         .min(1),
       related: z.array(z.string()).optional(),
+      lessons: z.array(z.string()).optional(),
     }),
   }),
 };

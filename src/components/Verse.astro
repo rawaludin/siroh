@@ -1,0 +1,50 @@
+---
+import { ayahsAudioUrls } from "../lib/audio";
+
+interface Props {
+  arabic: string;
+  translation: string;
+  source: string;
+  surah?: number;
+  ayah?: number;
+  ayahEnd?: number;
+}
+const { arabic, translation, source, surah, ayah, ayahEnd } = Astro.props;
+const hasAudio = typeof surah === "number" && typeof ayah === "number";
+const urls = hasAudio ? ayahsAudioUrls(surah!, ayah!, ayahEnd) : [];
+---
+<figure class="verse">
+  <blockquote lang="ar" dir="rtl" class="verse__arabic">{arabic}</blockquote>
+  <figcaption class="verse__translation">“{translation}”</figcaption>
+  <cite class="verse__source">{source}</cite>
+  {hasAudio && (
+    <button class="verse__play" type="button" data-play-audio={JSON.stringify(urls)} aria-label="Dengarkan ayat">
+      ▶️ Dengarkan
+    </button>
+  )}
+</figure>
+
+<style>
+  .verse {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: #f4efe6;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+  }
+  .verse__arabic { margin: 0; font-size: 1.5rem; line-height: 1.9; color: #3a3328; }
+  .verse__translation { margin: 0.5rem 0 0; font-style: italic; color: var(--muted); }
+  .verse__source { display: block; margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted); font-style: normal; }
+  .verse__play {
+    margin-top: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+  }
+  .verse__play.is-playing { background: var(--secondary); }
+</style>
