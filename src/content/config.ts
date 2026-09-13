@@ -19,6 +19,7 @@ const themeIds = [
   "persaudaraan",
   "masa-kecil",
   "masa-muda",
+  "masyarakat",
 ] as const;
 
 const tokoh = defineCollection({
