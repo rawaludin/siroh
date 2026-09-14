@@ -11,6 +11,7 @@ export default defineConfig({
     mdx(),
     AstroPWA({
       registerType: "autoUpdate",
+      base: "/siroh/",
       includeAssets: ["icons/icon.svg"],
       manifest: {
         name: "Sirah Nabawiyah",
@@ -32,6 +33,17 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png}"],
+        manifestTransforms: [
+          (entries) => ({
+            manifest: entries.map((e) => {
+              let url = e.url.replace(/index\.html$/, "");
+              if (url === "" || url === "index.html") url = "./";
+              if (!/\.[a-z0-9]+$/i.test(url) && !url.endsWith("/")) url += "/";
+              return { ...e, url };
+            }),
+            warnings: [],
+          }),
+        ],
       },
       pwaAssets: { image: "public/icons/icon.svg" },
     }),
