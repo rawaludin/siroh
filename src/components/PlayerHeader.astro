@@ -14,6 +14,7 @@ const { total = 0 } = Astro.props;
     <div class="player__bar"><div id="progress-fill"></div></div>
     <span id="progress-label">0%</span>
   </div>
+  <button type="button" id="reset-progress" class="player__reset" aria-label="Reset progres">↺ Reset</button>
 </header>
 
 <style>
@@ -29,6 +30,17 @@ const { total = 0 } = Astro.props;
   .player__progress { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 120px; }
   .player__bar { flex: 1; height: 12px; background: rgba(255,255,255,0.35); border-radius: 999px; overflow: hidden; }
   #progress-fill { height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.4s ease; }
+  .player__reset {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .player__reset:hover { background: rgba(255, 255, 255, 0.35); }
 </style>
 
 <script>
@@ -52,4 +64,12 @@ const { total = 0 } = Astro.props;
 
   render();
   window.addEventListener("siroh:updated", render);
+
+  document.getElementById("reset-progress")?.addEventListener("click", () => {
+    const ok = confirm("Yakin ingin mengatur ulang progres belajar? Poin, level, streak, dan lencana akan dihapus.");
+    if (ok) {
+      localStorage.removeItem(KEY);
+      window.dispatchEvent(new Event("siroh:updated"));
+    }
+  });
 </script>
