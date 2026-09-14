@@ -1,0 +1,9 @@
+{
+  "name": "Hunain",
+  "nameAr": "حنين",
+  "description": "Lembah di antara Makkah dan Thaif, lokasi Perang Hunain.",
+  "order": 26,
+  "relatedEvents": [
+    "perang-hunain-dan-thaif"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Dumatul Jandal",
+  "nameAr": "دومة الجندل",
+  "description": "Oasis di utara Jazirah Arab yang menjadi tujuan ekspedisi kaum muslimin.",
+  "order": 22,
+  "relatedEvents": [
+    "perang-dumatul-jandal"
+  ]
+}

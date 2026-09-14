@@ -1,0 +1,9 @@
+{
+  "name": "Najd",
+  "nameAr": "نجد",
+  "description": "Wilayah tengah Jazirah Arab yang menjadi tujuan ekspedisi kaum muslimin.",
+  "order": 23,
+  "relatedEvents": [
+    "perang-dzatur-riqa"
+  ]
+}

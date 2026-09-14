@@ -1,0 +1,11 @@
+{
+  "name": "Aqabah",
+  "nameAr": "العقبة",
+  "description": "Lokasi di Mina tempat kaum Yatsrib berikrar setia (Baiat Aqabah) kepada Nabi ﷺ.",
+  "location": "Mina, Makkah",
+  "order": 24,
+  "relatedEvents": [
+    "baiat-aqabah-pertama",
+    "baiat-aqabah-kedua"
+  ]
+}

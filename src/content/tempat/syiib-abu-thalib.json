@@ -1,0 +1,9 @@
+{
+  "name": "Syi'ib Abu Thalib",
+  "nameAr": "شعب أبي طالب",
+  "description": "Lembah di Makkah tempat Bani Hasyim diboikot selama tiga tahun.",
+  "order": 25,
+  "relatedEvents": [
+    "pemboikotan-bani-hasyim"
+  ]
+}

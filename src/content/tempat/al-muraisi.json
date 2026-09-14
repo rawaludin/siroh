@@ -1,0 +1,9 @@
+{
+  "name": "Al-Muraisi'",
+  "nameAr": "المريسيع",
+  "description": "Mata air di antara Makkah dan Madinah, tempat terjadinya Perang Bani Musthaliq.",
+  "order": 21,
+  "relatedEvents": [
+    "perang-bani-musthaliq"
+  ]
+}
