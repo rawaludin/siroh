@@ -2,5 +2,11 @@
   "term": "Kabilah",
   "termAr": "قبيلة",
   "definition": "Suku atau klan besar dalam masyarakat Arab. Nabi Muhammad ﷺ berasal dari kabilah Quraisy.",
-  "order": 38
+  "order": 38,
+  "relatedEvents": [
+    "keadaan-arab-sebelum-islam",
+    "kepercayaan-bangsa-arab",
+    "peradaban-quraisy",
+    "silsilah-nabi"
+  ]
 }

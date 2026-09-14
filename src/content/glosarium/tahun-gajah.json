@@ -2,5 +2,8 @@
   "term": "Tahun Gajah",
   "termAr": "عام الفيل",
   "definition": "Tahun kelahiran Nabi Muhammad ﷺ. Dinamai Tahun Gajah karena pada tahun itu pasukan bergajah menyerang Ka'bah.",
-  "order": 43
+  "order": 43,
+  "relatedEvents": [
+    "abrahah-dan-pasukan-gajah"
+  ]
 }

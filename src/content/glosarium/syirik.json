@@ -2,5 +2,8 @@
   "term": "Syirik",
   "termAr": "شرك",
   "definition": "Perbuatan menyekutukan Allah dengan menyembah sesuatu yang lain. Nabi Muhammad ﷺ mengajak kaumnya meninggalkan syirik.",
-  "order": 5
+  "order": 5,
+  "relatedEvents": [
+    "kepercayaan-bangsa-arab"
+  ]
 }

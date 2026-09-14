@@ -2,5 +2,10 @@
   "term": "Quraisy",
   "termAr": "قريش",
   "definition": "Kabilah (suku) besar di Makkah tempat Nabi Muhammad ﷺ berasal. Kaum Quraisy menjaga Ka'bah sebelum Islam datang.",
-  "order": 7
+  "order": 7,
+  "relatedEvents": [
+    "kepercayaan-bangsa-arab",
+    "peradaban-quraisy",
+    "syiqqul-qamar"
+  ]
 }

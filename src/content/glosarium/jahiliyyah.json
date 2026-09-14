@@ -2,5 +2,9 @@
   "term": "Jahiliyyah",
   "termAr": "جاهلية",
   "definition": "Masa kebodohan sebelum datangnya Islam, ketika banyak orang menyembah berhala. Nabi Muhammad ﷺ diutus untuk mengakhiri masa jahiliyyah.",
-  "order": 6
+  "order": 6,
+  "relatedEvents": [
+    "keadaan-arab-sebelum-islam",
+    "kepercayaan-bangsa-arab"
+  ]
 }
