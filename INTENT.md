@@ -36,14 +36,18 @@ penuh** dan konten **sedetail ensiklopedia**.
     dari situs publik penyedia audio Qur'an (everyayah.com).
 13. **Server di 0.0.0.0** — agar bisa diverifikasi di HP lewat Tailscale.
 14. **Ensiklopedia** — konten diperdalam jadi **artikel multi-bagian**
-    (Latar Belakang, Kronologi, Tokoh Kunci, Ayat & Hadits, Pelajaran).
-    Diputuskan: artikel multi-bagian (bukan koleksi tokoh/tempat terpisah),
-    dikerjakan sebagai fase lanjutan.
+    (Latar Belakang, Kronologi, Tokoh Kunci, Ayat & Hadits, Pelajaran), PLUS
+    koleksi referensi silang **Tokoh / Tempat / Glosarium** (indeks + halaman
+    detail, saling tertaut dengan peristiwa).
 15. **Teks Arab untuk percakapan** — setiap teks percakapan harus menyertakan
     **teks Arab-nya**, dengan **referensi yang jelas**.
 16. **Feedback WhatsApp** — tautan feedback ke **wa.me/628112071744**, dengan
     **template pesan** yang menyertakan kolom untuk **kontak dan identitas**
     pengirim (Nama, Nomor HP/WA, Email, Masukan).
+17. **Perbanyak peristiwa** — arah 1 (peristiwa sekunder di era yang ada) +
+    arah 2 (konteks pra-Islam/Jahiliyyah).
+18. **Deploy publik** — unggah ke host publik (GitHub Pages via domain
+    `rahmatawaludin.com`), agar bisa diakses orang lain.
 
 ## Detail Kontak Feedback
 
@@ -51,11 +55,15 @@ penuh** dan konten **sedetail ensiklopedia**.
 - Template pesan WA (pre-filled):
   - Nama, Nomor HP/WA, Email (opsional), Masukan.
 
-## Status Implementasi (saat INTENT.md ditulis)
+## Status Implementasi
 
-- Selesai: scaffold, garis waktu, halaman detail, filter/pencarian, teks Arab,
-  desain game-like, gamifikasi (logika + UI), PWA, audio ayat, komponen
-  Verse/Hadith/Dialogue, lessons, link feedback WA.
-- Sedang berjalan: enrichment konten Post-Fath (Task 15), retrofit teks Arab
-  dialog (Task 21), validasi akhir (Task 16).
-- Fase lanjutan (belum dikerjakan): artikel multi-bagian (ensiklopedia).
+- **Live:** https://rahmatawaludin.com/siroh/ (GitHub Pages via domain
+  `rahmatawaludin.com`; auto-deploy dari branch `main` repo `rawaludin/siroh`).
+- **Selesai:** scaffold, garis waktu, halaman detail, filter/pencarian, teks
+  Arab, desain game-like, gamifikasi (logika + UI), PWA, audio ayat, komponen
+  Verse/Hadith/Dialogue, lessons, link feedback WA, artikel multi-bagian,
+  koleksi referensi silang, perbanyak peristiwa, deploy publik.
+- **Konten:** 49 peristiwa, 52 tokoh, 20 tempat, 50 glosarium.
+- **Catatan teknis:** base path `/siroh/` di-hardcode di 9 file + `astro.config.mjs`
+  (bukan `import.meta.env.BASE_URL` yang bermasalah di Astro 5.18). Jika pindah
+  ke root domain, perlu diganti jadi satu sumber.

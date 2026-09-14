@@ -20,9 +20,15 @@ npm run preview    # pratinjau build produksi
 
 ## Struktur Konten
 
+Ada empat koleksi konten (skema didefinisikan di `src/content/config.ts`):
+
+- `src/content/events/` — peristiwa garis waktu (MDX).
+- `src/content/tokoh/` — tokoh/people (MDX).
+- `src/content/tempat/` — tempat/places (JSON data).
+- `src/content/glosarium/` — istilah/glossary (JSON data).
+
 Setiap peristiwa adalah satu file MDX di `src/content/events/`, dengan
-frontmatter YAML dan isi artikel. Skema frontmatter didefinisikan di
-`src/content/config.ts` menggunakan Zod.
+frontmatter YAML dan isi artikel.
 
 Contoh frontmatter:
 
@@ -144,6 +150,33 @@ melalui komponen `PlayerHeader` serta logika klien di halaman detail.
 
 URL audio ayat dibangun di `src/lib/audio.ts` dari nomor surah dan ayat,
 menggunakan arsip publik [everyayah.com](https://everyayah.com).
+
+## Koleksi Referensi Silang (Tokoh / Tempat / Glosarium)
+
+Selain garis waktu, ada tiga koleksi ensiklopedia yang saling tertaut:
+
+- **Tokoh** (`src/content/tokoh/*.mdx`) — `name`, `nameAr`, `role`, `order`,
+  `relatedEvents` (opsional); bio di body MDX.
+- **Tempat** (`src/content/tempat/*.json`) — `name`, `nameAr`, `description`,
+  `location` (opsional), `order`, `relatedEvents` (opsional).
+- **Glosarium** (`src/content/glosarium/*.json`) — `term`, `termAr`,
+  `definition`, `order`, `relatedEvents` (opsional).
+
+Relasi antar-koleksi dilakukan lewat `relatedEvents` (larik slug peristiwa).
+Halaman detail peristiwa menampilkan tautan ke tokoh/tempat/glosarium terkait
+via `relatedEntries()` di `src/lib/related.ts`. Masing-masing koleksi punya
+halaman indeks (`/tokoh/`, `/tempat/`, `/glosarium/`) dan halaman detail
+(`/tokoh/[slug]/`, dst.).
+
+## Deployment
+
+- Live: **https://rahmatawaludin.com/siroh/** (GitHub Pages, domain
+  `rahmatawaludin.com`; repo `rawaludin/siroh`).
+- Deploy otomatis via GitHub Actions (`.github/workflows/deploy.yml`) — setiap
+  push ke `main` membangun ulang dan mem-publish `dist/`.
+- **Base path `/siroh/`** di-hardcode di `astro.config.mjs` (`base`, `site`)
+  dan konstanta `base` di 9 file `.astro` (lihat catatan di `INTENT.md`).
+  Jika pindah ke root domain, ganti jadi satu sumber.
 
 ## Feedback
 
